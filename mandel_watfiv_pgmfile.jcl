@@ -3,50 +3,37 @@
 //SYSIN DD *                                                            00240000
 $JOB
       COMPLEX R
-      CHARACTER*1 L(80)
-C
-      DATA LL/80/
-      COMMON IMAX
-      DATA IMAX/20/
 C
       COMPLEX MAND
       LOGICAL CZERO
 C
-      WRITE (6, 9998)
-9998  FORMAT (1H1)
-
+      DATA IW /320/
+      DATA IH /240/
+C
       PUNCH , 'P2'
-      PUNCH , 80
-      PUNCH , 40
+      PUNCH , IW
+      PUNCH , IH
       PUNCH , 255
-      Y = 1
-      WHILE (Y .GE. -1) DO
-        DO 10 I = 1, LL
-          L(I) = ' '
-10      CONTINUE
+      IY = 1
+      WHILE (IY .LE. IH) DO
+        Y = 1.0 - ((IY-1)*2.0/IH)
+        IX = 1
 C
-        X = -2
-        I = 1
-        WHILE (X .LE. 0.5) DO
-          R = MAND (CMPLX (X, Y))
-C         PUNCH , J
+        WHILE (IX .LE. IW) DO
+          X = (-2.0) + ((IX-1)*3.0/IW)
+C          PRINT , X, Y
+C
+          ITER = 0
+          R = MAND (CMPLX (X, Y), ITER)
           IF (CZERO(R)) THEN DO
-            L(I) = '#'
-            PUNCH , 0
-          ELSE DO
-            L(I) = ' '
-            PUNCH , 255
+            ITER = 0
           END IF
+          PUNCH , ITER
 C
-          X = X + 0.0315
-          I = I + 1
+          IX = IX + 1
         END WHILE
-        WRITE (6, 999) L
-999     FORMAT (1H , 132A1)
-C
-        Y = Y - 0.05
+        IY = IY + 1
       END WHILE
-      WRITE (6, 9998)
       STOP                                                              00100000
       END                                                               00110000
       REAL FUNCTION CABS2 (Z)
@@ -67,14 +54,14 @@ C
       END IF
       RETURN
       END
-      COMPLEX FUNCTION MAND (ZIN)
+      COMPLEX FUNCTION MAND (ZIN, ITER)
       COMPLEX ZIN
-      COMMON IMAX
       COMPLEX Z, C
       Z = ZIN
       C = ZIN
-      DO 10 I = 1, 20
+      DO 10 I = 1, 255
         Z = Z*Z + C
+        ITER = I
         IF (CABS2(Z) .GT. 4) THEN DO
           MAND = Z
           GOTO 20
