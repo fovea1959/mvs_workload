@@ -8,23 +8,24 @@ C
       LOGICAL CZERO
 C
       DATA IW /320/
-      DATA IH /240/
+      DATA IH /320/
+      DATA IM /4/
 C
       PUNCH , 'P2'
       PUNCH , IW
       PUNCH , IH
-      PUNCH , 255
+      PUNCH , IM
       IY = 1
       WHILE (IY .LE. IH) DO
-        Y = 1.0 - ((IY-1)*2.0/IH)
+        Y = 2.0 - ((IY-1)*4.0/IH)
         IX = 1
 C
         WHILE (IX .LE. IW) DO
-          X = (-2.0) + ((IX-1)*3.0/IW)
+          X = (-2.0) + ((IX-1)*4.0/IW)
 C          PRINT , X, Y
 C
           ITER = 0
-          R = MAND (CMPLX (X, Y), ITER)
+          R = MAND (CMPLX (X, Y), ITER, IM)
           IF (CZERO(R)) THEN DO
             ITER = 0
           END IF
@@ -54,14 +55,15 @@ C
       END IF
       RETURN
       END
-      COMPLEX FUNCTION MAND (ZIN, ITER)
+      COMPLEX FUNCTION MAND (ZIN, ITER, IM)
       COMPLEX ZIN
       COMPLEX Z, C
       Z = ZIN
       C = ZIN
-      DO 10 I = 1, 255
+      IMP1 = IM + 1
+      DO 10 I = 1, IMP1
         Z = Z*Z + C
-        ITER = I
+        ITER = I - 1
         IF (CABS2(Z) .GT. 4) THEN DO
           MAND = Z
           GOTO 20
