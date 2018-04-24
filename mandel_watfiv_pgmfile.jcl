@@ -1,15 +1,17 @@
-//WATFIVAA JOB (SYS),'Mandelbrot punch',CLASS=S,MSGCLASS=A              00010000
+//MNDPGM@# JOB (SYS),'Mandelbrot grey',CLASS=C,MSGCLASS=A               00010000
+/*JOBPARM CARDS=9999999
+//*MIN: 30s
 //        EXEC WATFIV                                                   00230000
 //SYSIN DD *                                                            00240000
-$JOB
+$JOB TIME=1440
       COMPLEX R
 C
       COMPLEX MAND
       LOGICAL CZERO
 C
-      DATA IW /320/
-      DATA IH /320/
-      DATA IM /4/
+      DATA IW /1024/
+      DATA IH /1024/
+      DATA IM /256/
 C
       PUNCH , 'P2'
       PUNCH , IW

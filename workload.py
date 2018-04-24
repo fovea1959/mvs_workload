@@ -49,9 +49,9 @@ def submit(last_submissions):
                     rest_of_jobcard = jobcard.group(2)
                     new_jobname = ''
                     for c in jobname:
-                        if c == 'n':
+                        if c == '#':
                             new_jobname += random.choice(list('0123456789'))
-                        elif c == 'a':
+                        elif c == '@':
                             new_jobname += random.choice(list('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
                         else:
                             new_jobname += c

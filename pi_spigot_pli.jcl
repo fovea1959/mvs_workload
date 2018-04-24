@@ -1,4 +1,4 @@
-//PI9300aa JOB (001),'PI Spigot, PL/I',                                 00010000
+//PI9300@@ JOB (001),'PI Spigot, PL/I',                                 00010000
 //             CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1),REGION=256K            00020000
 //*
 //* The PL/I vertical bar is dec 79, hex 4F
