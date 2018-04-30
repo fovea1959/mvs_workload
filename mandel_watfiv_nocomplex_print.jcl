@@ -20,24 +20,8 @@ C
         CR = -2.0
         I = 1
         WHILE (CR .LE. 0.5) DO
-          ZR = 0.0
-          ZI = 0.0
-          ZRSQR = 0.0
-          ZISQR = 0.0
-          II = 0
-20        CONTINUE
-            ZI = ZR * ZI
-            ZI = ZI + ZI
-            ZI = ZI + CI
-            ZR = ZRSQR - ZISQR + CR
-            ZRSQR = ZR * ZR
-            ZISQR = ZI * ZI
-            II = II + 1
-            IF (II .GT. IMX) GOTO 30
-          IF (ZRSQR + ZISQR .LT. 4.0) GOTO 20
-30        CONTINUE
-C
-          IF (II .GT. IMX) THEN DO
+          IRES = IMAND (CR, CI, ITER, 20)
+          IF (IRES .GT. 0) THEN DO
             L(I) = '#'
           ELSE DO
             L(I) = ' '
@@ -54,6 +38,30 @@ C
       WRITE (6, 9998)
       STOP                                                              00100000
       END                                                               00110000
+      FUNCTION IMAND (CR, CI, ITER, IMX)
+C     non zero return value means in set
+      ZR = 0.0
+      ZI = 0.0
+      ZRSQR = 0.0
+      ZISQR = 0.0
+      ITER = 0
+      DO 100 I = 1, IMX
+       ZI = ZR * ZI
+       ZI = ZI + ZI
+       ZI = ZI + CI
+       ZR = ZRSQR - ZISQR + CR
+       ZRSQR = ZR * ZR
+       ZISQR = ZI * ZI
+       IF (ZRSQR + ZISQR .GE. 4.0) THEN DO
+        IMAND = 0
+        ITER = I
+        RETURN
+       END IF
+100   CONTINUE
+      IMAND = 1
+      ITER = I
+      RETURN
+      END
 $ENTRY
 /*
 //
