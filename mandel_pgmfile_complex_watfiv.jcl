@@ -1,4 +1,4 @@
-//W5GRCX@# JOB (SYS),'Mbrot grey cmplx',CLASS=C,MSGCLASS=A              00010000
+//W5GRCX@# JOB (SYS),'Mbrot grey cmplx',CLASS=B,MSGCLASS=A              00010000
 /*JOBPARM CARDS=9999999
 //*MIN: 30s
 //CMPLXPGM EXEC WATFIV                                                  00230000

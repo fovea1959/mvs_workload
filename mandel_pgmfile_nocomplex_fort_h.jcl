@@ -1,15 +1,11 @@
-//FHGRSM@# JOB (SYS),'Mbrot grey nocmplx',CLASS=C,MSGCLASS=A,           00010000
+//FHGRSM@# JOB (SYS),'Mbrot grey nocmplx',CLASS=B,MSGCLASS=A,           00010000
 //             MSGLEVEL=(1,1)
 /*JOBPARM CARDS=9999999
 //*MIN: 30s
-//SIMCLG  EXEC FORTHCLG,
-//             PARM.FORT='OPT=2,MAP,XREF,FORMAT,LIST,LINECOUNT(60)'
+//SIMCLG  EXEC FORTHCLG,PARM.FORT='OPT=1'
 //FORT.SYSLIN DD UNIT=SYSDA                                             00040000
-//FORT.SYSUT1 DD UNIT=SYSDA,SPACE=(3465,(10,10))
-//FORT.SYSUT2 DD UNIT=SYSDA,SPACE=(3465,(10,10))
 //FORT.SYSABEND DD SYSOUT=A                                             00050000
 //FORT.SYSIN DD *                                                       00060000
-      IMPLICIT REAL*8 (A-H, O-Z)
       DATA IW /1024/
       DATA IH /1024/
       DATA IM /256/
@@ -17,10 +13,10 @@ C
       DATA Y0 /2.0/, Y1 /-2.0/
       DATA X0 /-2.0/, X1 /2.0/
 C
-      XS = DMIN1(X0,X1)
-      YS = DMAX1(Y0,Y1)
-      XSPAN = DABS(X1-X0)
-      YSPAN = DABS(Y1-Y0)
+      XS = AMIN1(X0,X1)
+      YS = AMAX1(Y0,Y1)
+      XSPAN = ABS(X1-X0)
+      YSPAN = ABS(Y1-Y0)
 C
       WRITE (7, 9999) XS, YS
 9999  FORMAT (18H# FORTH_nocomplex_, E14.8, 1H_, E14.8, 4H.PGM)
@@ -42,7 +38,6 @@ C
       END                                                               00110000
       FUNCTION IMAND (CR, CI, ITER, IMX)
 C     non zero return value means in set
-      IMPLICIT REAL*8 (A-H, O-Z)
       ZR = 0.0
       ZI = 0.0
       ZRSQR = 0.0

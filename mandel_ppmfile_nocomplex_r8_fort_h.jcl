@@ -1,101 +1,94 @@
-//MNDPPM@# JOB (SYS),'Mandelbrot color',CLASS=C,MSGCLASS=A              00010000
+//FHCLSM@# JOB (SYS),'Mbrot color nocmplx',CLASS=B,MSGCLASS=A,          00010000
+//             MSGLEVEL=(1,1)
 /*JOBPARM CARDS=9999999
 //*MIN: 30s
-//        EXEC WATFIV                                                   00230000
-//SYSIN DD *                                                            00240000
-$JOB TIME=1440
-      COMPLEX R
-C
-      COMPLEX MAND
-      LOGICAL CZERO
-C
+//SIMCLG  EXEC FORTHCLG,
+//             PARM.FORT='OPT=2,MAP,FORMAT'
+//FORT.SYSLIN DD UNIT=SYSDA                                             00040000
+//FORT.SYSUT1 DD UNIT=SYSDA,SPACE=(3465,(10,10))
+//FORT.SYSUT2 DD UNIT=SYSDA,SPACE=(3465,(10,10))
+//FORT.SYSABEND DD SYSOUT=A                                             00050000
+//FORT.SYSIN DD *                                                       00060000
+      IMPLICIT REAL*8 (A-H, O-Z)
       DATA IW /1024/
       DATA IH /1024/
-      INTEGER MAXITR
 C
-      LOGICAL QT /.FALSE./
+      DATA Y0 /2.0/, Y1 /-2.0/
+      DATA X0 /-2.0/, X1 /2.0/
 C
       INTEGER IR(1024), IG(1024), IB(1024)
       INTEGER IIR, IIG, IIB
 C
       DO 100 I = 1, 1024
-        READ(5,*,END=110) IIR, IIG, IIB
-        MAXITR = I
-        IR(I) = IIR
-        IG(I) = IIG
-        IB(I) = IIB
-        PRINT, 'RGB', I, IIR, IIG, IIB
+       READ(5,9990,END=110) IIR, IIG, IIB
+9990   FORMAT(I3,X,I3,X,I3)
+       MAXITR = I
+       IR(I) = IIR
+       IG(I) = IIG
+       IB(I) = IIB
+       WRITE(6,9991) I, IIR, IIG, IIB
+9991   FORMAT (5H RGB=, 4I5)
 100   CONTINUE
 110   MAXITR = MAXITR - 1
-      PRINT, 'MAXITR = ', MAXITR
+      WRITE (6, 9992) MAXITR
+9992  FORMAT (8H MAXITR=, I4)
 C
-      IF (QT) THEN DO
-        STOP
-      END IF
+      XS = DMIN1(X0,X1)
+      YS = DMAX1(Y0,Y1)
+      XSPAN = DABS(X1-X0)
+      YSPAN = DABS(Y1-Y0)
 C
-      PUNCH , '# complex.ppm'
-      PUNCH , 'P3'
-      PUNCH , IW
-      PUNCH , IH
-      PUNCH , 256
-      IY = 1
-      WHILE (IY .LE. IH) DO
-        Y = 2.0 - ((IY-1)*4.0/IH)
-        IX = 1
+      WRITE (7, 9999) XS, YS
+9999  FORMAT (18H# FORTH_nocomplex_, E14.8, 1H_, E14.8, 4H.PPM)
+      WRITE (7, 9998) IW, IH
+9998  FORMAT (2HP3, 2I5, 5H  256)
 C
-        WHILE (IX .LE. IW) DO
-          X = (-2.0) + ((IX-1)*4.0/IW)
-          ITER = 0
-          R = MAND (CMPLX (X, Y), ITER, MAXITR)
-          IF (CZERO(R)) THEN DO
-            PUNCH , 0, 0, 0
-          ELSE DO
-            ICIDX = ITER + 1
-            PUNCH , IR(ICIDX), IG(ICIDX), IB(ICIDX)
-          END IF
+      DO 1000 IY = 1, IH
+       CI = YS - ((IY-1)*YSPAN/IH)
 C
-          IX = IX + 1
-        END WHILE
-        IY = IY + 1
-      END WHILE
+       DO 500 IX = 1, IW
+        CR = XS + ((IX-1)*YSPAN/IW)
+        IRES = IMAND (CR, CI, ITER, MAXITR)
+        IF (IRES .GT. 0) GOTO 410
+C        not in the set, so color it
+         WRITE (7, 9997) IR(ITER), IG(ITER),IB(ITER)
+9997     FORMAT (3I5)
+        GOTO 420
+C        in the set. it gets black
+410      WRITE (7, 9996)
+9996     FORMAT (5H0 0 0)
+420     CONTINUE
+500    CONTINUE
+1000  CONTINUE
       STOP                                                              00100000
       END                                                               00110000
-      REAL FUNCTION CABS2 (Z)
-      COMPLEX Z
-      REAL R, I
-C
-      R = REAL(Z)
-      I = AIMAG(Z)
-C
-      CABS2 = R*R + I*I
+      FUNCTION IMAND (CR, CI, ITER, IMX)
+C     non zero return value means in set
+      IMPLICIT REAL*8 (A-H, O-Z)
+      ZR = 0.0
+      ZI = 0.0
+      ZRSQR = 0.0
+      ZISQR = 0.0
+      ITER = 0
+      DO 100 I = 1, IMX
+       ZI = ZR * ZI
+       ZI = ZI + ZI
+       ZI = ZI + CI
+       ZR = ZRSQR - ZISQR + CR
+       ZRSQR = ZR * ZR
+       ZISQR = ZI * ZI
+       IF (ZRSQR + ZISQR .LT. 4.0) GOTO 90
+        IMAND = 0
+        ITER = I
+        RETURN
+90     CONTINUE
+100   CONTINUE
+      IMAND = 1
+      ITER = I
       RETURN
       END
-      LOGICAL FUNCTION CZERO (Z)
-      COMPLEX Z
-      CZERO = .TRUE.
-      IF (CABS(Z) .GT. 0) THEN DO
-        CZERO = .FALSE.
-      END IF
-      RETURN
-      END
-      COMPLEX FUNCTION MAND (ZIN, ITER, MAXITR)
-      COMPLEX ZIN
-      COMPLEX Z, C
-      Z = ZIN
-      C = ZIN
-      IMP1 = MAXITR + 1
-      DO 10 I = 1, IMP1
-        Z = Z*Z + C
-        ITER = I - 1
-        IF (CABS2(Z) .GT. 4) THEN DO
-          MAND = Z
-          RETURN
-        END IF
-   10 CONTINUE
-      MAND = (0.0,0.0)
-      RETURN
-      END
-$ENTRY
+/*
+//GO.SYSIN DD *
   0   0   0
   0   0   0
   0   0   4

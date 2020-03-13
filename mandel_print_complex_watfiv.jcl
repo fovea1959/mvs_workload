@@ -1,4 +1,4 @@
-//MNDPRT@# JOB (SYS),'Mbrot prt cmplx',CLASS=A,MSGCLASS=A               00010000
+//W5PRCX@# JOB (SYS),'Mbrot prt cmplx',CLASS=A,MSGCLASS=A               00010000
 //*MIN: 30s
 //        EXEC WATFIV                                                   00230000
 //SYSIN DD *                                                            00240000

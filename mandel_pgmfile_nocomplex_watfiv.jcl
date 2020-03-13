@@ -1,4 +1,4 @@
-//W5GRSM@# JOB (SYS),'Mbrot grey nocmplx',CLASS=C,MSGCLASS=A            00010000
+//W5GRSM@# JOB (SYS),'Mbrot grey nocmplx',CLASS=B,MSGCLASS=A            00010000
 /*JOBPARM CARDS=9999999
 //*MIN: 30s
 //SIMPGM  EXEC WATFIV                                                   00230000
