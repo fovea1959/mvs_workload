@@ -1,5 +1,9 @@
 //GOTHIC JOB  (001),'ASM GOTHIC',                                       00010000
 //             CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1),REGION=128K            00020000
+//*
+//* this is linking to SYS2.LINKLIB.
+//* You will need to re-IPL to be able to run changes after update.
+//*
 //HELLO  EXEC ASMFCL                                                    00030000
 //ASM.SYSPUNCH DD DUMMY
 //ASM.SYSGO DD SPACE=(80,(1200,150))
@@ -44,6 +48,8 @@ HOP      LA    R9,1                                                     00360000
          BE    CONTPG                                                   00380010
          MVI   CLEAR+1,C' '                                             00390010
          MVI   FILL+1,C'W'                                              00400010
+         L     R0,=A(PATUNLIN)                                          00401000
+         ST    R0,PATBASE                                               00401010
          BAL   R3,CLEAR                                                 00410010
          MVI   OUTREC,C'1'                                              00420000
          BAL   R3,PRINT                                                 00430000
