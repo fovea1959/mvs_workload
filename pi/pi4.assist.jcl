@@ -92,12 +92,12 @@ FORJTOP  EQU   *
 *         XDUMP DECBUF,DECBUFL
          UNPK  UNPBUF,CVDBUF
          OI    UNPBUF+3,X'F0'
-         XDUMP DECBUF,DECBUFL
+*         XDUMP DECBUF,DECBUFL
 *         XDECO R1,OUTBUF
          LA    R1,OUTBUF
          AR    R1,OUTBUFI
          MVC   0(4,R1),UNPBUF
-         XDUMP OUTBUF,OUTBUFL
+*         XDUMP OUTBUF,OUTBUFL
          A     OUTBUFI,=F'4'
          C     OUTBUFI,=A(OUTBUFL)
          BL    OUTDONE
@@ -114,6 +114,7 @@ OUTDONE  EQU   *
 * All done
 *
 RETURNA  EQU   *
+         XPRNT OUTBUF,OUTBUFL
          LM    R14,R12,12(R13)        RELOAD THOSE REGISTERS
          BR    R14
 ARRS     DC    (DIGITS+1)F'2000'
