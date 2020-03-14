@@ -144,8 +144,8 @@ RETURNA  EQU   *
          L     R1,=A(DIGITS*4+4)
          FREEMAIN R,A=(ARR),LV=(R1)
 *
-         WTO   'Committing suicide'
-         ABEND 666,DUMP
+*        WTO   'Committing suicide'
+*        ABEND 666,DUMP
 *
          L     R13,SAVEAREA+4     ! load address of caller's save area
          LM    R14,R12,12(R13)    RELOAD THOSE REGISTERS
