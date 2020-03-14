@@ -1,5 +1,5 @@
 //PI4ASM   JOB (001),'PI4 spigot asm',                                  00010000
-//             CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1),REGION=128K            00020000
+//             CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1),REGION=1024K           00020000
 //HELLO  EXEC ASMFCLG                                                   00030000
 //ASM.SYSUT1 DD UNIT=SYSDA                                              00040000
 //ASM.SYSUT2 DD UNIT=SYSDA                                              00050000
@@ -23,7 +23,7 @@ R13      EQU   13
 R14      EQU   14
 R15      EQU   15
 *
-DESIRED  EQU   180
+DESIRED  EQU   9000
 DIGITS   EQU   DESIRED*14/4
 MAIN     CSECT
          STM   R14,R12,12(R13)  SAVE THOSE REGISTERS
@@ -34,8 +34,15 @@ MAIN     CSECT
          LA    R13,SAVEAREA     ! load address of my save area
          ST    R13,8(R2)        ! store address of my save area in
 *                               !    caller's save area
-         LA    ARR,ARRS
-*         XDUMP ARRS,ALEN
+         L     R1,=A(DIGITS*4+4)
+         GETMAIN R,LV=(R1)
+         LR    ARR,R1
+*
+         L     R0,=F'2000'
+         L     R1,=A(DIGITS*4)
+LLOOP    ST    R0,0(ARR,R1)
+         S     R1,=F'4'
+         BNM   LLOOP
 *
 * Set up output
 *
@@ -49,11 +56,11 @@ MAIN     CSECT
 *
 * FOR I=DIGITS,1,-14
 *
-         LA    I,DIGITS
+         L     I,=A(DIGITS)
 FORITOP  EQU   *
          SR    SUM,SUM
 *
-* FOR J = I, 1, -14
+* FOR J = I, 1, -1
 *
          LR    J,I
 FORJTOP  EQU   *
@@ -134,6 +141,12 @@ RETURNA  EQU   *
          PUT   SYSPRINT,OUTBUF
          CLOSE (SYSPRINT)
 *
+         L     R1,=A(DIGITS*4+4)
+         FREEMAIN R,A=(ARR),LV=(R1)
+*
+         WTO   'Committing suicide'
+         ABEND 666,DUMP
+*
          L     R13,SAVEAREA+4     ! load address of caller's save area
          LM    R14,R12,12(R13)    RELOAD THOSE REGISTERS
          SR    R15,R15
@@ -153,9 +166,8 @@ OUTBUF   DC    CL133' 0'
 OUTBUFL  EQU   *-OUTBUF
 OUTBUFX  DC    CL132' '      overflow
          LTORG
-ARRS     DC    (DIGITS+1)F'2000'
-ALEN     EQU   *-ARRS
          END
 $ENTRY
 /*
 //GO.SYSPRINT DD SYSOUT=A
+//GO.SYSUDUMP DD SYSOUT=A

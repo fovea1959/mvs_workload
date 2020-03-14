@@ -12,24 +12,28 @@ J4       EQU   6
 SUM      EQU   7
 CARRY    EQU   8
 ARR      EQU   9
-R10      EQU   10
+OUTBUFI  EQU   10
 R11      EQU   11
 R12      EQU   12
 R13      EQU   13
 R14      EQU   14
 R15      EQU   15
 *
-DESIRED  EQU   90
+DESIRED  EQU   180
 DIGITS   EQU   DESIRED*14/4
 MAIN     CSECT
          STM   R14,R12,12(R13)        SAVE THOSE REGISTERS
          BALR  R12,0
          USING *,R12
          LA    ARR,ARRS
-         XDUMP ARRS,ALEN
+*         XDUMP ARRS,ALEN
+*
+* Set up output buffer
+*
+         LA    OUTBUFI,2(0,0)         Get past initial 0
+*
          SR    CARRY,CARRY carry := 0
-         XDUMP
-*         XPRNT =CL133' Starting FOR J'
+*
 * FOR I=DIGITS,1,-14
 *
          LA    I,DIGITS
@@ -73,24 +77,39 @@ FORJTOP  EQU   *
 * finish FOR J loop
 *
          S     J,=F'1'
-         BH    FORJTOP    keep going of J > 0 !!!!!!!!!!!!!!!!!!
+         BP    FORJTOP    keep going if J > 0 !!!!!!!!!!!!!!!!!!
 *
 * 4 digits are carry + sum / SCALE
 *
          SR    R0,R0
          LR    R1,SUM
          D     R0,=F'10000'
-         AR    R1,CARRY
+         AR    R1,CARRY   r1 = carry + (sum / scale)
          LR    CARRY,R0   carry = sum % SCALE
-         XPRNT =CL133' 4 digits in R1'
-         XDUMP
-         XDECO R1,OUTBUF
+         CVD   R1,CVDBUF
+*         XPRNT =CL133' 4 digits in R1 and in CVDBUF'
+*         XDUMP
+*         XDUMP DECBUF,DECBUFL
+         UNPK  UNPBUF,CVDBUF
+         OI    UNPBUF+3,X'F0'
+         XDUMP DECBUF,DECBUFL
+*         XDECO R1,OUTBUF
+         LA    R1,OUTBUF
+         AR    R1,OUTBUFI
+         MVC   0(4,R1),UNPBUF
+         XDUMP OUTBUF,OUTBUFL
+         A     OUTBUFI,=F'4'
+         C     OUTBUFI,=A(OUTBUFL)
+         BL    OUTDONE
          XPRNT OUTBUF,OUTBUFL
+         S     OUTBUFI,=F'132'
+         MVC   OUTBUF+1,OUTBUFX
+OUTDONE  EQU   *
 *
 * finish FOR I loop
 *
          S     I,=F'14'
-         BH    FORITOP    keep going if I > 0 !!!!!!!!!!!!!!!!!!
+         BP    FORITOP    keep going if I > 0 !!!!!!!!!!!!!!!!!!
 *
 * All done
 *
@@ -99,8 +118,15 @@ RETURNA  EQU   *
          BR    R14
 ARRS     DC    (DIGITS+1)F'2000'
 ALEN     EQU   *-ARRS
-OUTBUF   DC    CL13' '
+         DS    0D
+OUTBUF   DC    CL133' 0'
 OUTBUFL  EQU   *-OUTBUF
+OUTBUFX  DC    CL132' '      overflow
+         DS    0D
+DECBUF   EQU   *
+CVDBUF   DC    CL8' '
+UNPBUF   DC    CL4' '
+DECBUFL  EQU   *-DECBUF
          LTORG
          END
 $ENTRY

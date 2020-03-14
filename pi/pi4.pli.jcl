@@ -1,11 +1,11 @@
-//PI4PLI   JOB (001),'PI spilog4 pli',                                  00010000
+//PI4PLI   JOB (001),'PI spigot4 pli',                                  00010000
 //             CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1),REGION=256K            00020000
 //*
 //* The PL/I vertical bar is dec 79, hex 4F
 //* WITH DEFAULT HERC CODE PAGE, ascii version is dec 215, hex D7
 //* with 819/1049 (TK3UPD), ascii version is dec 124, hex 7c
 //*
-//B992   EXEC PL1LFCLG,PARM.PL1L='LOAD,NODECK,XREF,ATR'                 00030000
+//       EXEC PL1LFCLG,PARM.PL1L='LOAD,NODECK,XREF,ATR'                 00030000
 //PL1L.SYSLIN DD UNIT=SYSDA                                             00040000
 //PL1L.SYSIN DD *                                                       00050000
  /*
@@ -13,21 +13,21 @@
     "A Spigot Algorithm for the Digits of Pi".
  */
 
- SPIGOT: PROCEDURE OPTIONS (MAIN);         /* 21 January 2012. */
+ SPIGOT4: PROCEDURE OPTIONS (MAIN);
+  DECLARE DESIRED FIXED BINARY(31);
+  DESIRED = 9000;
+
   DECLARE DIGITS FIXED BINARY(31);
-  DIGITS = 100;
+  DIGITS = (DESIRED * 14) / 4;
 
   DECLARE SCALE FIXED BINARY(31);
   SCALE = 10000;
 
   BEGIN; 
    DECLARE ARR(0:DIGITS) FIXED BINARY (31);
-   DECLARE I FIXED BINARY (31);
-   DECLARE J FIXED BINARY (31);
-   DECLARE ISUM FIXED BINARY (31);
-   DECLARE CARRY FIXED BINARY (31);
-   DECLARE J21 FIXED BINARY (31);
-   DECLARE D FIXED BINARY(31);
+   DECLARE (I, J, SUM, CARRY) FIXED BINARY (31);
+
+   PUT FILE(SYSPRINT) EDIT ('0') (A);
 
    CARRY = 0;
 
@@ -36,27 +36,19 @@
    END;
 
    DO I = DIGITS TO 1 BY -14;
-    ISUM = 0;
+    SUM = 0;
     DO J = I TO 1 BY -1;
-     ISUM = ISUM*J + SCALE*ARR(J);
-     PUT EDIT('SUMx', ISUM) (SKIP(1),A(5),F(10));
-     PUT EDIT('J', J) (SKIP(1),A(5),F(10));
-     J21 = J * 2 - 1;
-     PUT EDIT('J21', J21) (SKIP(1),A(5),F(10));
-     ARR(J) = MOD (ISUM, J21);
-     /* ISUM = DIVIDE (ISUM, J21, 31, 0); */
-     ISUM = ISUM / J21;
-     PUT EDIT('ISUMy', ISUM) (SKIP(1),A(5),F(10));
+     SUM = SUM*J + SCALE*ARR(J);
+     ARR(J) = MOD (SUM, J*2 - 1);
+     SUM = SUM / (J*2 - 1);
     END;
-    D = CARRY + ISUM / SCALE; 
-    PUT EDIT('D4', D) (SKIP(1),A(5),F(10));
-    PUT EDIT('CARRY', CARRY) (SKIP(1),A(5),F(10));
-    PUT EDIT('ISUM', ISUM) (SKIP(1),A(5),F(10));
-    CARRY = MOD (ISUM, SCALE);
+    PUT FILE(SYSPRINT) EDIT(CARRY + SUM / SCALE) (P'9999');
+    CARRY = MOD (SUM, SCALE);
    END;
   END;
- END SPIGOT;
+ END SPIGOT4;
 /*
 //LKED.SYSLIB DD DSN=SYS1.PL1LIB,DISP=SHR                               00090000
 //GO.STEPLIB DD DSN=SYS1.PL1LIB,DISP=SHR                                00100000
+//GO.SYSPRINT DD SYSOUT=A,DCB=(RECFM=FA,LRECL=133)
 //                                                                      00110000
