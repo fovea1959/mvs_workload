@@ -1,4 +1,4 @@
-//PI4FORTH JOB (001),'PI4 spigot fortran h',                            00010000
+//PI4FORTH JOB (001),'Pi spigot4 FORTRAN H',                            00010000
 //             CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1),TIME=60                00020000
 //        EXEC FORTHCLG,REGION.FORT=384K,PARM.FORT='NOLIST,OPT=2'
 //FORT.SYSLIN DD UNIT=SYSDA                                             00040000

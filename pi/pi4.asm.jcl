@@ -1,4 +1,4 @@
-//PI4ASM   JOB (001),'PI4 spigot asm',                                  00010000
+//PI4ASM   JOB (001),'Pi spigot4 asm',                                  00010000
 //             CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1),REGION=1024K           00020000
 //HELLO  EXEC ASMFCLG                                                   00030000
 //ASM.SYSUT1 DD UNIT=SYSDA                                              00040000

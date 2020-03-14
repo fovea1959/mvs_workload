@@ -1,4 +1,4 @@
-//PIFORTG  JOB (001),'PI spigot fortran g',                             00010000
+//PIFORTG  JOB (001),'Pi spigot FORTRAN G',                             00010000
 //             CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1)                        00020000
 //        EXEC FORTGCLG,REGION.FORT=384K,PARM.FORT='NOLIST'
 //FORT.SYSLIN DD UNIT=SYSDA                                             00040000
