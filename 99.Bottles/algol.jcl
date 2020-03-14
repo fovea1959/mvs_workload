@@ -10,7 +10,7 @@
     by Erik Schoenfelder.
 
     Lower case, whitespace, ASCII, literal strings,
-    implementation character set, etc, and other    
+    implementation character set, etc, and other
     modern conceits are ahistoric and waste cards and tape.
 
     Tom Jennings 5 Jan 2006
@@ -20,11 +20,11 @@
 'value' n;
 'integer' n;
 'begin'
-  'if' n < 1 
+  'if' n < 1
     'then' outstring(1, '('no more ')')
     'else' outinteger(1, n);
-  'if' n = 1 
-    'then' outstring(1, '('bottle')') 
+  'if' n = 1
+    'then' outstring(1, '('bottle')')
     'else' outstring(1, '('bottles')');
   outstring(1, '(' of beer')');
 'end';
@@ -37,7 +37,7 @@
 SYSACT(1,6,120); SYSACT(1,8,62); SYSACT(1,12,1);
 
 'for' i := 99 'step' -1 'until' 0 'do' 'begin'
-  bottles(i); outstring(1, '(' on the wall, ')'); bottles(i); 
+  bottles(i); outstring(1, '(' on the wall, ')'); bottles(i);
   SYSACT(1,14,1); 'COMMENT' NEW LINE;	
 	
   'if' i > 0
@@ -48,7 +48,7 @@ SYSACT(1,6,120); SYSACT(1,8,62); SYSACT(1,12,1);
     'else' 'begin'
       outstring(1, '('go to the store, ')');
       outstring(1, '('buy some more, ')');
-      bottles(99); 
+      bottles(99);
     'end';
     outstring(1, '(' on the wall.')');
     SYSACT(1,14,2); 'COMMENT' NEW LINE;

@@ -3,7 +3,7 @@
 //A68CCLG EXEC A68CLG
 //A68.SYSIN DD *
 BEGIN
-  PROC howmany = (INT i) VOID: 
+  PROC howmany = (INT i) VOID:
     BEGIN
       IF i = 0 THEN
 	    print ("no more bottles of beer")
@@ -14,7 +14,7 @@ BEGIN
 	    print (" bottles of beer")
 	  FI
 	END;
-  
+
   INT i;
   INT j;
   FOR i FROM 99 BY -1 TO 0 DO
@@ -25,10 +25,10 @@ BEGIN
 	new line(stand out);
 	
 	IF i > 0
-	 THEN 
+	 THEN
 	   print ("Take one down, pass it around");
 	   j := i - 1
-	 ELSE 
+	 ELSE
 	   print ("Go to the store, buy some more");
 	   j := 99
 	 FI;

@@ -35,8 +35,9 @@ begin
       writeln (
         ' No more bottles of beer on the wall, no more bottles of beer.');
       write (' Go to the store and buy some more, ');
-      writeln ('99 bottles of beer on the wall.')    
+      writeln ('99 bottles of beer on the wall.')
     end
   end
-end./*
+end.
+/*
 //

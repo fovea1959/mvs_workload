@@ -14,7 +14,7 @@ BEGIN
 	FI;
 	rv
   );
-  
+
   INT i;
   INT j;
   FOR i FROM 99 BY -1 TO 0 DO
@@ -25,10 +25,10 @@ BEGIN
 	new line(stand out);
 	
 	IF i > 0
-	 THEN 
+	 THEN
 	   print ("Take one down, pass it around");
 	   j := i - 1
-	 ELSE 
+	 ELSE
 	   print ("Go to the store, buy some more");
 	   j := 99
 	 FI;
