@@ -164,7 +164,7 @@ OUTDCB   DCB   BLKSIZE=1330,LRECL=133,RECFM=FBA,MACRF=(PM),            X01570000
                DSORG=PS,DDNAME=SYSPRINT                                 01580000
 FMTRET   DC    A(0)                                                     01590000
 NUMCHAR  DC    A(0)                                                     01600014
-PATBASE  DC    A(PATLIN)                                                01610017
+PATBASE  DC    A(PATUNLIN)                                              01610017
 CARD     DC    CL80' '                                                  01620014
 OUTREC   DS    0CL133                                                   01630000
          DC    C'1'                                                     01640000
