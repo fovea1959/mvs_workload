@@ -3,6 +3,10 @@
 #define SCALE 10000
 #define ARRINIT 2000
 
+// from http://www.codecodex.com/wiki/Calculate_digits_of_pi#C
+//
+// last digit is correct with invoked w/ 10000 'digits'
+
 void pi_digits(int digits) {
  int carry = 0;
  int arr[digits+1];
@@ -12,17 +16,19 @@ void pi_digits(int digits) {
   int sum = 0;
   for (int j = i; j > 0; --j) {
    sum = sum * j + SCALE * arr[j];
-   printf ("SUMx %10d\n", sum);
-   printf ("J    %10d\n", j);
+   //printf ("SUMx %10d\n", sum);
+   //printf ("J    %10d\n", j);
    arr[j] = sum % (j * 2 - 1);
    sum /= j * 2 - 1;
-   printf ("SUMy %10d\n", sum);
+   //printf ("SUMy %10d\n", sum);
   }
-  printf ("D4   %10d\n", carry + sum / SCALE);
-  printf ("CARRY%10d\n", carry);
-  printf ("SUM  %10d\n", sum);
+  printf ("%4.4d", carry + sum / SCALE);
+  //printf ("D4   %10d\n", carry + sum / SCALE);
+  //printf ("CARRY%10d\n", carry);
+  //printf ("SUM  %10d\n", sum);
   carry = sum % SCALE;
  }
+ printf("\n");
 }
 
 int main (int argc, char** argv) {
