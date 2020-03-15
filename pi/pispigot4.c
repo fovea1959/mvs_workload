@@ -12,6 +12,8 @@ void pi_digits(int digits) {
  int arr[digits+1];
  for (int i = 0; i <= digits; ++i) 
   arr[i] = ARRINIT;
+ int k = 0;
+ printf("3.");
  for (int i = digits; i > 0; i -= 14) {
   int sum = 0;
   for (int j = i; j > 0; --j) {
@@ -22,7 +24,12 @@ void pi_digits(int digits) {
    sum /= j * 2 - 1;
    //printf ("SUMy %10d\n", sum);
   }
-  printf ("%4.4d", carry + sum / SCALE);
+  if (k == 0) {
+   printf ("%01d", carry + sum/SCALE - 3000);
+  } else {
+   printf ("%04d", carry + sum / SCALE);
+  } 
+  k++;
   //printf ("D4   %10d\n", carry + sum / SCALE);
   //printf ("CARRY%10d\n", carry);
   //printf ("SUM  %10d\n", sum);

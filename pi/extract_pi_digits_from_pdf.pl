@@ -21,7 +21,7 @@ sub readpi {
  return $pi;
 }
 
-my $ref = readpi('pi1000000.txt');
+my $ref = readpi('pi_dec_1m.txt');
 printf "length of ref = %d\n", length($ref);
 my $test = readpi ("pdftotext \"$ARGV[0]\" - |");
 #printf "pi = %s\n", $pi;
