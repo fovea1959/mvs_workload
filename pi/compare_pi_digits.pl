@@ -23,7 +23,7 @@ sub readpi {
 
 my $ref = readpi('pi_dec_1m.txt');
 printf "length of ref = %d\n", length($ref);
-my $test = readpi ("pdftotext \"$ARGV[0]\" - |");
+my $test = readpi ($ARGV[0]);
 #printf "pi = %s\n", $pi;
 printf "length of test = %d\n", length($test);
 
@@ -32,7 +32,7 @@ foreach my $i (0..length($test)-1) {
  my $a = substr($ref,$i,1);
  my $b = substr($test,$i,1);
  if ($a ne $b) {
-  printf "difference in digit %d: %s <> %s\n", $i, $a, $b;
+  printf "difference in digit %d: ref '%s' <> test '%s'\n", $i, $a, $b;
   $same = 0;
   last;
  }

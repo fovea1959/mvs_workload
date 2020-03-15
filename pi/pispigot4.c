@@ -4,16 +4,12 @@
 #define ARRINIT 2000
 
 // from http://www.codecodex.com/wiki/Calculate_digits_of_pi#C
-//
-// last digit is correct with invoked w/ 10000 'digits'
 
 void pi_digits(int digits) {
  int carry = 0;
  int arr[digits+1];
  for (int i = 0; i <= digits; ++i) 
   arr[i] = ARRINIT;
- int k = 0;
- printf("3.");
  for (int i = digits; i > 0; i -= 14) {
   int sum = 0;
   for (int j = i; j > 0; --j) {
@@ -24,12 +20,7 @@ void pi_digits(int digits) {
    sum /= j * 2 - 1;
    //printf ("SUMy %10d\n", sum);
   }
-  if (k == 0) {
-   printf ("%01d", carry + sum/SCALE - 3000);
-  } else {
-   printf ("%04d", carry + sum / SCALE);
-  } 
-  k++;
+  printf ("%04d", carry + sum / SCALE);
   //printf ("D4   %10d\n", carry + sum / SCALE);
   //printf ("CARRY%10d\n", carry);
   //printf ("SUM  %10d\n", sum);
@@ -40,6 +31,8 @@ void pi_digits(int digits) {
 
 int main (int argc, char** argv) {
  int n = argc == 2 ? atoi(argv[1]) : 100;
- pi_digits(n);
+ // can't do arbitrary digits, need to use this
+ int digits = (n * 14) / 4;
+ pi_digits(digits);
  return 0;
 }
