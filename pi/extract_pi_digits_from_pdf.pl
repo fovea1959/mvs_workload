@@ -32,7 +32,7 @@ foreach my $i (0..length($test)-1) {
  my $a = substr($ref,$i,1);
  my $b = substr($test,$i,1);
  if ($a ne $b) {
-  printf "difference in digit %d: %s <> %s\n", $i, $a, $b;
+  printf "difference in digit %d: '%s' <> '%s'\n", $i, $a, $b;
   $same = 0;
   last;
  }
