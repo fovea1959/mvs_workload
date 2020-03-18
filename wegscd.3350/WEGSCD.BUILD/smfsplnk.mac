@@ -1,0 +1,651 @@
+//SMFSPLNK JOB (DOUG,5278),COMPILE.SMF.SPLUNK,CLASS=A,MSGCLASS=A,
+//             MSGLEVEL=(1,1)
+//        EXEC PL1LFCL,REGION.PL1L=256K,
+//  PARM.PL1L='M,NS2,N=SMFSPLNK,SIZE=999999,LC=60,SM=(2,72,1)',
+//  PARM.LKED='NOXREF,LIST'
+//PL1L.SYSLIN DD UNIT=SYSDA
+//PL1L.SYSIN DD *
+ SMFPLNK: PROC OPTIONS(MAIN);
+
+ DECLARE Y2KJTOG ENTRY;
+
+ DCL     SMFTIME                   RETURNS(CHARACTER(12) VARYING);
+ DCL     TS                        RETURNS(CHARACTER(23) VARYING);
+ DCL     PRINTABLECC               RETURNS(CHARACTER(40) VARYING);
+ DCL     FNL                       RETURNS(CHARACTER(9) VARYING);
+ DCL     JOBID                     RETURNS(CHARACTER(40) VARYING);
+ DCL     STEPID                    RETURNS(CHARACTER(40) VARYING);
+ DCL     T8                        RETURNS(CHARACTER(8) VARYING);
+ DCL     CPUTIME                   RETURNS(CHARACTER(40) VARYING);
+ DCL     PTRADD                    RETURNS(POINTER);
+ DCL     P2F   RETURNS(FIXED BIN (31));
+ DCL     F2P   RETURNS(POINTER);
+
+ DCL     SMFDATA                   INPUT RECORD;
+ DCL     EOF_SMF                   BIT(1)        INIT('0'B);
+
+ DCL     RECORDS_READ              FIXED DEC(9)  INIT(0);
+ DCL     RECORDS_SEL               FIXED DEC(9)  INIT(0);
+
+ DCL     SYSPRINT                  PRINT;
+ DCL     PAGENO                    FIXED DEC(5)  INIT(0);
+
+ DCL     (
+          ADDR,
+          BOOL,
+          DATE,
+          FIXED,                                         /* PF061793 */
+          FLOAT,                                         /* PF061693 */
+          FLOOR,
+          HBOUND,
+          INDEX,                                         /* PF061693 */
+          LENGTH,
+          MOD,
+          NULL,
+          STRING,
+          SUBSTR,
+          UNSPEC,
+          VERIFY
+         )
+                                   BUILTIN;
+ DCL     PPPM BIN(31);
+1/* ---------------------------------------------------------------- */
+ /*                SMF COMMON HEADER                                 */
+ /* ---------------------------------------------------------------- */
+ DCL     SMFP                      POINTER;
+ DCL   1 SMFREC          UNALIGNED BASED(SMFP),
+         5 SMFXFLG                 BIT(8),       /* SYSTEM INDICATOR */
+         5 SMFXRTY                 BIT(8),       /* RECORD TYPE      */
+         5 SMFXTME                 FIXED BIN(31),/* TIME WRITTEN     */
+         5 SMFXDTE                 FIXED DEC(7), /* DATE WRITTEN     */
+         5 SMFXSID                 CHAR(4),      /* SYSTEM IDENT     */
+         5 SMFX_RECORD_START       CHAR(0);      /* START OF DATA    */
+
+ /* ---------------------------------------------------------------- */
+ /*                SMF TYPE 0 (IPL) RECORD                           */
+ /* ---------------------------------------------------------------- */
+
+ DCL  1  SMF00                     UNALIGNED BASED(SMFP),
+         5 SMF0FLG                 BIT(8),
+         5 SMF0RTY                 BIT(8),
+         5 SMF0TME                 FIXED BIN(31),
+         5 SM50DTE                 FIXED DEC(7),
+         5 SMF0SID                 CHAR(4),
+         5 SMF0JWT                 FIXED BIN(31),
+         5 SMF0BUF                 FIXED BIN(31),
+         5 SMF0VST                 FIXED BIN(31),
+         5 SMF0OPT                 BIT(8),
+         5 SMF0RST                 FIXED BIN(31);
+
+1DCL  1  SMF04                     UNALIGNED BASED(SMFP),
+         5 SMF4FLG                 BIT(8),
+         5 SMF4RTY                 BIT(8),
+         5 SMF4TME                 FIXED BIN(31),
+         5 SMF4DTE                 FIXED DEC(7),
+         5 SMF4SID                 CHAR(4),
+         5 SMF4JBN                 CHAR(8),
+         5 SMF4RST                 FIXED BIN(31),
+         5 SMF4RSD                 FIXED DEC(7),
+         5 SMF4UIF                 CHAR(8),
+         5 SMF4STN                 BIT(8),
+         5 SMF4SIT                 FIXED BIN(31),
+         5 SMF4STID                FIXED DEC(7),
+         5 SMF4NCI                 FIXED BIN(31),
+         5 SMF4SCC                 BIT(16),
+         5 SMF4PRTY                BIT(8),
+         5 SMF4PGMN                CHAR(8),
+         5 SMF4STMN                CHAR(8),
+         5 SMF4RSV5                CHAR(2),
+         5 SMF4SYST                FIXED BIN(15),
+         5 SMF4HOST                FIXED BIN(15),
+         5 SMF4RV1                 CHAR(2),
+         5 SMF4RSHO                FIXED BIN(31),
+         5 SMF4SPK                 BIT(8),
+         5 SMF4STI                 BIT(8),
+         5 SMF4RV2                 CHAR(2),
+         5 SMF4AST                 FIXED BIN(31),
+         5 SMF4PPST                FIXED BIN(31),
+         5 SMF4RV3                 CHAR(1),
+         5 SMF4SRBT                BIT(24),
+         5 SMF4RIN                 BIT(16),
+         5 SMF4RLCT                FIXED BIN(15),
+         5 SMF4LENN                FIXED BIN(15),
+         5 SMF4DEVA                CHAR(0);
+         /* DEVICE ENTRY FORMAT                 */
+ DCL     SMF4DEVP                  POINTER;
+ DCL  1  SMF4DEV                   UNALIGNED BASED(SMFDEVP),
+         5 SMF4DEVC                BIT(8),
+         5 SMF4UTYP                BIT(8),
+         5 SMF4UCAD                FIXED BIN(15),
+         5 SMF4EXCP                FIXED BIN(31),
+         5 SMF4DEVE                CHAR(0);
+         /* ACCOUNTING SECTION                  */
+ DCL     SMF4ACCTP                 POINTER;
+ DCL  1  SMF4ACCT                  UNALIGNED BASED(SMF4ACCTP),
+         5 SMF4LNTH                BIT(8),
+         5 SMF4SETM                BIT(24),
+         5 SMF4NAF                 BIT(8),
+         5 SMF4ACTF                CHAR(0);
+         /* RELOCATE SETCION                    */
+ DCL     SMF4RELP                  POINTER;
+ DCL  1  SMF4REL                   UNALIGNED BASED(SMF4RELP),
+         5 SMF4PGIN                FIXED BIN(31),
+         5 SMF4PGOT                FIXED BIN(31),
+         5 SMF4NSW                 FIXED BIN(31),
+         5 SMF4PSI                 FIXED BIN(31),
+         5 SMF4PSO                 FIXED BIN(31),
+         5 SMF4VPI                 FIXED BIN(31),
+         5 SMF4VPO                 FIXED BIN(31),
+         5 SMF4SST                 FIXED BIN(31),
+         5 SMF4ACT                 FIXED BIN(31),
+         5 SMF4PGNO                FIXED BIN(15),
+         5 SMF4TRAN                FIXED BIN(31),
+         5 SMF4RECL                FIXED BIN(31),
+         5 SMF4RCLM                FIXED BIN(31),
+         5 SMF4CPGN                FIXED BIN(31),
+         5 SMF4CRCL                FIXED BIN(31),
+         5 SMF4PGST                FIXED BIN(31),
+         5 SMF4PSEC                BIT(64),
+         5 SMF4LPAI                FIXED BIN(31),
+         5 SMF4LPAR                FIXED BIN(31),
+         5 SMF4CPUS                FIXED BIN(31),
+         5 SMF4IOCS                FIXED BIN(31),
+         5 SMF4MSOS                FIXED BIN(31),
+         5 SMF4SRBS                FIXED BIN(31),
+         5 SMF4RSV1                CHAR(8);
+
+1DCL  1  SMF05                     UNALIGNED BASED(SMFP),
+         5 SMF5FLG                 BIT(8),
+         5 SMF5RTY                 BIT(8),
+         5 SMF5TME                 FIXED BIN(31),
+         5 SMF5DTE                 FIXED DEC(7),
+         5 SMF5SID                 CHAR(4),
+         5 SMF5JBN                 CHAR(8),
+         5 SMF5RST                 FIXED BIN(31),
+         5 SMF5RSD                 FIXED DEC(7),
+         5 SMF5UIF                 CHAR(8),
+         5 SMF5NST                 BIT(8),
+         5 SMF5JIT                 FIXED BIN(31),
+         5 SMF5JID                 FIXED DEC(7),
+         5 SMF5NCI                 FIXED BIN(31),
+         5 SMF5JCC                 BIT(16),
+         5 SMF5JPTY                BIT(8),
+         5 SMF5RSTT                FIXED BIN(31),
+         5 SMF5RSTD                FIXED DEC(7),
+         5 SMF5JBTI                BIT(8),
+         5 SMF5SMCI                BIT(8),
+         5 SMF5TRAN                FIXED BIN(31),
+         5 SMF5CKRE                BIT(8),
+         5 SMF5RDCL                BIT(8),
+         5 SMF5RUTY                BIT(8),
+         5 SMF5JICL                CHAR(1),
+         5 SMF5SPK                 BIT(8),
+         5 SMF5SRBT                BIT(24),
+         5 SMF5TJS                 FIXED BIN(31),
+         5 SMF5TTAT                FIXED BIN(31),
+         5 SMF5RV2                 FIXED BIN(31),
+         5 SMF5PGNO                FIXED BIN(15),
+         5 SMF5RV3                 FIXED BIN(15),
+         5 SMF5TLEN                BIT(8),
+         5 SMF5PRGN                CHAR(20),
+         5 SMF5JCPU                BIT(24),
+         5 SMF5ACTF                BIT(8);
+
+1/* ---------------------------------------------------------------- */
+ /*                SMF TYPE 20 (JOB INITIATION) RECORD               */
+ /* ---------------------------------------------------------------- */
+
+ DCL  1  SMF20                     UNALIGNED BASED(SMFP),
+         5 SMF20FLG                BIT(8),
+         5 SMF20RTY                BIT(8),
+         5 SMF20TME                FIXED BIN(31),
+         5 SMF20DTE                FIXED DEC(7),
+         5 SMF20SID                CHAR(4),
+         5 SMF20JBN                CHAR(8),
+         5 SMF20RST                FIXED BIN(31),
+         5 SMF20RSD                FIXED DEC(7),
+         5 SMF20UID                CHAR(8),
+         5 SMF20RLO                FIXED BIN(15),
+         5 SMF20PGM                CHAR(20),
+         5 SMF20NAF                FIXED BIN(7),
+         5 SMF20ACT                CHAR(0);
+
+ DCL  1  SMF34                     UNALIGNED BASED(SMFP),
+         5 SMF34_TIVRFLG           BIT(8),
+         5 SMF34_TIVRCDTY          BIT(8),
+         5 SMF34_TIVRCDTS          FIXED BIN(31),
+         5 SMF34_TIVRCDTE          FIXED DEC(7),
+         5 SMF34_TIVCPUID          CHAR(4),
+         5 SMF34_TIVUIF            CHAR(8),
+         5 SMF34_TIVONTME          FIXED BIN(31),
+         5 SMF34_TIVONDTE          FIXED DEC(7),
+         5 SMF34_TIVUDATA          CHAR(8),
+         5 SMF34_TIVINVSQ          BIT(8),
+         5 SMF34_TIVSIT            FIXED BIN(31),
+         5 SMF34_TIVOUTCT          FIXED BIN(31),
+         5 SMF34_TIVINCT           FIXED BIN(31),
+         5 SMF34_TIVSTAT           BIT(16),
+         5 SMF34_TIVPRI            BIT(8),
+         5 SMF34_TIVPRGNM          CHAR(8),
+         5 SMF34_TIVINVNM          CHAR(8);
+
+1ON ENDFILE(SMFDATA)  EOF_SMF='1'B;
+
+ READ FILE(SMFDATA) SET(SMFP);
+ DO WHILE(^EOF_SMF);
+
+     RECORDS_READ=RECORDS_READ+1;
+     /*
+     PUT SKIP(1) EDIT
+       ('XXXXXX READ: ', SMFXRTY, ' ', SMF0DTE, ' ', SMF0TME)
+       (A, P'ZZ9', A, P'99.999', A, P'99999999');
+     */
+
+     IF (SMFXRTY = 0) THEN DO;
+       CALL IPL;
+       END;
+     IF (SMFXRTY = 4) THEN DO;
+       CALL STEPTERM;
+       END;
+     IF (SMFXRTY = 5) THEN DO;
+       CALL JOBTERM;
+       END;
+     /* SMF TYPE 20S MAY BE DIRTY IF FROM TSO (BAD PROGRAMMER FIELD) */
+     /*
+     IF (SMFXRTY = 20) THEN DO;
+       CALL JOBINIT;
+       END;
+     */
+     IF (SMFXRTY = 34) THEN DO;
+       CALL TSTERM;
+       END;
+
+     READ FILE(SMFDATA) SET(SMFP);
+
+     END; /* DO WHILE */
+
+ PUT SKIP(2) EDIT(RECORDS_READ,' SMF RECORDS READ')
+                 (P'ZZZ,ZZZ,ZZ9',A);
+ PUT SKIP(1) EDIT(RECORDS_SEL, ' SMF RECORDS SELECTED')
+                 (P'ZZZ,ZZZ,ZZ9',A);
+
+ RETURN;
+1/********************************************************************/
+ /*      P R O C E S S   S M F   R E C O R D S                       */
+ /********************************************************************/
+
+ /*-------------------------------*/
+ /* PROCESS IPL EVENT             */
+ /*-------------------------------*/
+ IPL: PROC;
+   DCL A CHAR(80) VARYING;
+   PUT STRING(A) EDIT
+     (' VS=', FNL(SMF0VST), ' CS=', FNL(SMF0RST))
+     (A, A, A, A);
+
+   CALL EVENTSTART('IPL', A);
+   PUT SKIP EDIT ('--') (A);
+   RECORDS_SEL = RECORDS_SEL + 1;
+ END IPL;
+
+ /*-------------------------------*/
+ /* PROCESS STEP TERMINATION      */
+ /*-------------------------------*/
+ STEPTERM: PROC;
+   DCL A CHAR(80) VARYING;
+   PUT STRING(A) EDIT (
+     ' JOBID=', JOBID(SMF4JBN, SMF4RSD, SMF4RST),
+     ' STEPID=', STEPID(SMF4JBN, SMF4RSD, SMF4RST, FIXED(SMF4STN, 31))
+   )
+   (
+     A, A,
+     A, A
+   );
+
+   CALL EVENTSTART('STEPTERM', A);
+
+   /* TODO PREPROCESS PROGRAM FOR PGM=*.DD */
+   PUT SKIP EDIT (
+     ' JOB=', T8  (SMF4JBN),
+     ' STEP=', T8  (SMF4STMN),
+     ' CC=', PRINTABLECC(SMF4SCC,SMF4STI),
+     ' PROGRAM=', T8  (SMF4PGMN),
+     ' REGION=', FNL(SMF4RSH0),
+     ' MEMLOW=', FNL(FIXED(SMF4HOST,31,0)),
+     ' MEMHIGH=', FNL(FIXED(SMF4SYST,31,0)),
+     ' INIT=', TS(SMF4STID, SMF4SIT)
+   )
+   (
+     A, A,
+     A, A,
+     A, A,
+     A, A,
+     A, A,
+     A, A,
+     A, A,
+     A, A
+   );
+   /*
+   SMFOP = SMFP;
+   PUT SKIP EDIT ('TYPE=', SMFB(1)) (A, P'(9)9');
+   PUT SKIP EDIT ('-') (A);
+   PPPM = P2F(SMFP);
+   PUT SKIP EDIT ('PPPM=', PPPM) (A, P'(9)9');
+   PUT SKIP EDIT (' LEN=', SMF4LENN) (A, P'(9)9');
+   PUT SKIP EDIT (' OFF=', 102+ SMF4LENN) (A, P'(9)9');
+   PUT SKIP EDIT ('-') (A);
+
+   PPPM = PPPM + 102 + SMF4LENN;
+   PUT SKIP EDIT (' AFT=', PPPM) (A, P'(9)9');
+   PUT SKIP EDIT ('-') (A);
+   SMF4ACCTP = F2P(PPPM);
+   PUT SKIP EDIT ('LNTH=', SMF4LNTH) (A, P'(9)9');
+   PUT SKIP EDIT ('SETM=', SMF4SETM) (A, P'(9)9');
+   PUT SKIP EDIT (' NAF=', SMF4NAF ) (A, P'(9)9');
+   PUT SKIP EDIT ('-') (A);
+
+   */
+   SMF4ACCTP = PTRADD (SMFP, FIXED(102 + SMF4LENN, 31, 0));
+   /*
+   PPPM = P2F(SMF4ACCTP);
+
+   PUT SKIP EDIT (' AFT=', PPPM) (A, P'(9)9');
+   PUT SKIP EDIT ('-') (A);
+   PUT SKIP EDIT ('LNTH=', SMF4LNTH) (A, P'(9)9');
+   PUT SKIP EDIT ('SETM=', SMF4SETM) (A, P'(9)9');
+   PUT SKIP EDIT (' NAF=', SMF4NAF ) (A, P'(9)9');
+   */
+   PUT SKIP EDIT (
+     ' SRB=', CPUTIME(FIXED(SMF4SRBT,31,0)),
+     ' TCB=', CPUTIME(FIXED(SMF4SETM,31,0)),
+     ' CPU=', CPUTIME(FIXED(SMF4SETM+SMF4SRBT,31,0))
+   )
+   (
+     A, A,
+     A, A,
+     A, A
+   );
+
+   PUT SKIP EDIT ('--') (A);
+   RECORDS_SEL = RECORDS_SEL + 1;
+ END STEPTERM;
+
+1JOBTERM: PROC;
+   DCL A CHAR(80) VARYING;
+   PUT STRING(A) EDIT (
+     ' JOBID=', JOBID(SMF5JBN, SMF5RSD, SMF5RST)
+   )
+   (
+     A, A
+   );
+
+   CALL EVENTSTART('JOBTERM', A);
+
+   PUT SKIP EDIT (
+     ' CLASS=', SMF5JICL,
+     ' CC=', PRINTABLECC(SMF5JCC,SMF5JBTI),
+     ' CPU=', CPUTIME(FIXED(SMF5SRBT,31,0)),
+     ' SERVICE=', SMF5TJS,
+     ' INIT=', TS(SMF5JID, SMF5JIT)
+   )
+   (
+     A, A,
+     A, A,
+     A, A,
+     A, P'999999',
+     A, A
+   );
+
+   PUT SKIP EDIT (
+     ' PROGRAMMER="', SMF5PRGN, '"'
+   )
+   (
+     A, A, A
+   );
+
+   PUT SKIP EDIT ('--') (A);
+
+   RECORDS_SEL = RECORDS_SEL + 1;
+ END JOBTERM;
+
+1JOBINIT: PROC;
+   DCL A CHAR(80) VARYING;
+   PUT STRING(A) EDIT (
+     ' JOBID=', JOBID(SMF20JBN, SMF20RSD, SMF20RST)
+   )
+   (
+     A, A
+   );
+
+   CALL EVENTSTART('JOBINIT', A);
+
+   PUT SKIP EDIT (
+     ' JOB=', T8(SMF20JBN),
+     ' PROGRAMMER="', SMF5PRGN, '"'
+   )
+   (
+     A, A,
+     A, A, A
+   );
+
+   PUT SKIP EDIT ('--') (A);
+
+   RECORDS_SEL = RECORDS_SEL + 1;
+ END JOBINIT;
+
+1TSTERM: PROC;
+   DCL A CHAR(80) VARYING;
+   PUT STRING(A) EDIT (
+     ' JOB=', T8(SMF34_TIVUIF),
+     ' RDR=', TS(SMF34_TIVONDTE, SMF34_TIVONTME)
+   )
+   (
+     A, A, A, A
+   );
+
+   CALL EVENTSTART('TSSTEPTERM', A);
+
+   PUT SKIP EDIT (
+     ' STEP=', SMF34_TIVINVNM,
+     ' CC=', PRINTABLECC(SMF34_TIVSTAT, '0'B),
+     ' PROGRAM=', SMF34_TIVPRGNM,
+     ' TGETS=', FNL(SMF34_TIVINCT),
+     ' TPUTS=', FNL(SMF34_TIVOUTCT)
+   )
+   (
+     A, A,
+     A, A,
+     A, A,
+     A, A,
+     A, A
+   );
+
+   PUT SKIP EDIT ('--') (A);
+
+   RECORDS_SEL = RECORDS_SEL + 1;
+ END TSTERM;
+
+1/*  CONVERT BINARY TOD TO CHARACTER 'HH:MM:SS'                      */
+ SMFTIME: PROC(TIME) RETURNS(CHARACTER(12) VARYING);
+   DCL     TIME                    FIXED BIN(31); /* TIME IN SEC/100 */
+   DCL     WT                      FIXED BIN(31);
+   DCL     (HH,MM,SS,HS)           PIC'99';
+   DCL     TC                      CHAR(12) VARYING;
+   DCL     (FLOOR,MOD,SUBSTR)      BUILTIN;
+   HS=MOD(TIME,100);
+   WT=TIME/100;
+   SS=MOD(WT,60);
+   WT=FLOOR((WT-SS)/60);
+   MM=MOD(WT,60);
+   HH=FLOOR((WT-MM)/60);
+   TC=HH××':'××MM××':'××SS××'.'××HS;
+   RETURN(TC);
+ END SMFTIME;
+
+ TS: PROC (D,T) RETURNS (CHAR(23) VARYING);
+   DCL T FIXED BIN(31);
+   DCL D FIXED DEC(7);
+
+   DCL C7 CHAR(7),
+       C1 CHAR(1),
+       C8 CHAR(8);
+   PUT STRING(C7) EDIT ('20', D) (A, P'99999');
+   DCL A7 FIXED DEC(1) BASED (P7),
+       A1 FIXED DEC(1) BASED (P1),
+       A8 FIXED DEC(1) BASED (P8);
+   P7 = ADDR(C7); P1 = ADDR(C1); P8 = ADDR(C8);
+   CALL Y2KJTOG (A7, A1, A8);
+
+   DCL OUT CHAR(23) VARYING;
+   PUT STRING(OUT) EDIT (
+     SUBSTR(C8, 5, 4), '-', SUBSTR(C8,1,2), '-', SUBSTR(C8, 3, 2),
+     ':', SMFTIME(T)
+     )
+     (
+      A, A, A, A, A,
+      A, A
+     );
+   RETURN (OUT);
+ END TS;
+
+ PRINTABLECC: PROC (CC,STI) RETURNS (CHAR(40) VARYING);
+   DCL CC BIT(16);
+   DCL STI BIT(8);
+   DCL OUT CHAR(40) VARYING;
+   DCL CC1 FIXED BIN(31);
+   IF (CC < 256) THEN DO;
+     CC1 = CC;
+     PUT STRING(OUT) EDIT (FNL(CC1),',',CC) (A,A,P'999');
+     END;
+   ELSE DO;
+     DCL SU CHAR(1);
+     IF (CC > '1000000000000000'B) THEN SU = 'U'; ELSE SU = 'S';
+     DCL V BIT(16);
+     V = CC & '0000111111111111'B;
+     PUT STRING(OUT) EDIT (SU, V, ',', CC) (A, P'99999', A, P'99999');
+     END;
+   RETURN (OUT);
+ END PRINTABLECC;
+
+ EVENTSTART: PROC(T,S);
+   DCL T CHAR(8) VARYING;
+   DCL S CHAR(80) VARYING;
+   PUT SKIP EDIT (
+     '*EVENT TIME=', TS(SMFXDTE, SMFXTME),
+     ' TYPE=', T,
+     ' TYPECODE=', FNL(FIXED(SMFXRTY,31,0)),
+     ' SID=', SMFXSID,
+     S
+     )
+     (
+       A, A,
+       A, A,
+       A, A,
+       A, A,
+       A
+   );
+ END EVENTSTART;
+
+1FNL: PROC(I) RETURNS (CHAR(9) VARYING);
+   DCL I FIXED BIN(31);
+   DCL OUT CHAR(9) VARYING;
+   PUT STRING(OUT) EDIT (I) (P'999999999');
+   DO WHILE ((LENGTH(OUT) > 1) & (SUBSTR(OUT,1,1) = '0'));
+     OUT = SUBSTR(OUT, 2, LENGTH(OUT)-1);
+     END;
+   RETURN (OUT);
+ END FNL;
+
+ JOBID: PROC (J,D,T) RETURNS (CHAR(40) VARYING);
+   DCL J CHAR(8);
+   DCL T FIXED BIN(31);
+   DCL D FIXED DEC(7);
+   DCL OUT CHAR(40) VARYING;
+   PUT STRING(OUT) EDIT
+     (T8(J), '-', D, '-', SMFTIME(T))
+     (A, A, P'99.999', A, A);
+   RETURN (OUT);
+ END JOBID;
+
+ STEPID: PROC (J,D,T,S) RETURNS (CHAR(40) VARYING);
+   DCL J CHAR(8);
+   DCL T FIXED BIN(31);
+   DCL D FIXED DEC(7);
+   DCL OUT CHAR(40) VARYING;
+   PUT STRING(OUT) EDIT
+     (T8(J), '-', D, '-', SMFTIME(T), '-', FNL(S))
+     (A, A, P'99.999', A, A, A, A);
+   RETURN (OUT);
+ END STEPID;
+
+ CPUTIME: PROC (C) RETURNS (CHAR(40) VARYING);
+   DCL C BIN FIXED(31);
+   DCL OUT CHAR(40) VARYING;
+   DCL CS DEC FIXED (9);
+
+   CS = C;
+   PUT STRING(OUT) EDIT
+     (CS, ',', C)
+     (P'(8)Z9.99', A, P'(9)9');
+   DO WHILE (SUBSTR(OUT,1,1) = ' ');
+     OUT = SUBSTR(OUT, 2, LENGTH(OUT) - 1);
+     END;
+   RETURN (OUT);
+ END CPUTIME;
+
+ T8: PROC (J) RETURNS (CHAR(8) VARYING);
+   DCL J CHAR(8);
+   DCL J1 CHAR(8) VARYING;
+   J1 = J;
+   DO WHILE ((LENGTH(J1) > 0) & SUBSTR(J1,LENGTH(J1),1) = ' ');
+     J1 = SUBSTR(J1, 1, LENGTH(J1) - 1);
+     END;
+   RETURN (J1);
+ END T8;
+1/*-------------------------------*/
+ /* SUPPORT FOR PTRADD            */
+ /*-------------------------------*/
+ DCL     SMFOP                     POINTER;
+ DCL   1 SMFOFFSET       UNALIGNED BASED(SMFOP),
+         5 SMFB (0:1023)           BIT(8);
+
+ PTRADD: PROC(P, I) RETURNS (POINTER);
+   DCL OUT POINTER;
+   DCL P POINTER;
+   DCL I FIXED BIN(31);
+   SMFOP = P;
+   CALL PV ('  B4=', SMFO);
+   PUT SKIP EDIT ('   I=', I) (A, P'(9)9');
+   OUT = ADDR(SMFB(I));
+   CALL PV ('  AF=', OUT);
+   RETURN (OUT);
+ END PTRADD;
+
+ PV: PROC(A, P);
+   DCL A CHAR(8) VARYING;
+   DCL P BIN FIXED (31);
+   PUT SKIP EDIT (A, P) (A, P'(9)9');
+ END PV;
+
+ P2F: PROC (P) RETURNS(FIXED BIN (31));
+   DCL P FIXED BIN(31);
+   PUT SKIP EDIT (' P2F=', P) (A, P'(9)9');
+   RETURN (P);
+ END P2F;
+
+ F2P: PROC (P) RETURNS(POINTER);
+   DCL P POINTER;
+   RETURN (P);
+ END F2P;
+ END SMFPLNK;
+/*
+//LKED.SYSLIB  DD DSN=SYSC.PL1LIB,DISP=SHR
+//             DD DSN=JAY01.Y2K.LOADLIB,DISP=SHR
+//LKED.SYSLMOD DD DSN=WEGSCD.LOADLIB,DISP=OLD
+//GO      EXEC PGM=SMFSPLNK,
+//             PARM=''
+//STEPLIB   DD DSN=WEGSCD.LOADLIB,DISP=SHR
+//SYSPRINT  DD SYSOUT=*
+//REPORT    DD SYSOUT=*,DCB=(RECFM=VA,BLKSIZE=133)
+//SMFDATA   DD DSN=SMF.DAILY.DATA.G0074V00,DISP=(OLD,PASS)
+//*SMFDATA   DD DSN=WEGSCD.SMF,DISP=(OLD,PASS)

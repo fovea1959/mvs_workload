@@ -1,0 +1,383 @@
+//MVS0080 JOB  (SETUP),
+//             'Build Netsol Xmas',
+//             CLASS=A,
+//             MSGCLASS=A,
+//             MSGLEVEL=(1,1),
+//             COND=(0,NE),
+//             NOTIFY=WEGSCD
+//********************************************************************
+//*
+//* Name: SYS1.SETUP.CNTL(MVS0080)
+//*
+//* Desc: Build new NETSOL logon screen
+//*
+//********************************************************************
+//CLEANUP EXEC PGM=IDCAMS
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+ DELETE SYS1.UMODMAC(TURNKEY)
+ SET MAXCC=0
+ SET LASTCC=0
+//COMP    EXEC COMPRESS,LIB='SYS1.UMODMAC'
+//COPY    EXEC PGM=IEBCOPY
+//SYSPRINT DD  SYSOUT=*
+//SYSUT1   DD  DISP=SHR,DSN=SYS1.MACLIB
+//SYSUT2   DD  DISP=SHR,DSN=SYS1.UMODMAC
+//SYSIN    DD  *
+ COPY INDD=SYSUT1,OUTDD=SYSUT2
+ SELECT MEMBER=((NETSOL,,R))
+//UPDATE  EXEC PGM=IEBUPDTE
+//SYSPRINT DD  SYSOUT=*
+//SYSUT1   DD  DISP=SHR,DSN=SYS1.UMODMAC
+//SYSUT2   DD  DISP=SHR,DSN=SYS1.UMODMAC
+//SYSIN    DD  *
+./ ADD NAME=TURNKEY
+* >>>>>>>>>>>>>>>>>>>>>> Sample Screen Layout <<<<<<<<<<<<<<<<<<<<<<<<
+*
+* ----+----1----+----2----+----3----+----4----+----5----+----6----+---
+*             Welcome to MVS3.8J, running under the Hercules emulator
+*
+*
+*
+*  TTTTTTTT   UU    UU   RRRRRRR    NN     NN   KK   KK    EEEEEEEE
+*     TT      UU    UU   RR    RR   NNN    NN   KK  KK     EE
+*     TT      UU    UU   RR    RR   NNNN   NN   KK KK      EE
+*     TT      UU    UU   RRRRRRR    NN NN  NN   KKKK       EEEEEEE
+*     TT      UU    UU   RRRR       NN  NN NN   KK  KK     EE
+*     TT      UU    UU   RR  RR     NN   NNNN   KK   KK    EE
+*     TT      UU    UU   RR   RR    NN    NNN   KK    KK   EE
+*     TT       UUUUUU    RR    RR   NN     NN   KK     KK  EEEEEEE   Y
+*
+*
+*                        ]l      _,,,---,,_                brought to
+*                 ZZZzz /,'.-'`'    -.  ;-;;,              Volker Band
+*                      ],4-  ) )-,_. ,( (  ''-'            vbandke@bsp
+*                     '---''(_/--'  `-')_)      budrow's
+*
+*
+*
+*
+*  Logon ===>
+*
+         PUSH  PRINT
+*         PRINT OFF
+TURNKEY  DS    0C
+         $WCC  (RESETKBD,MDT)
+         $SBA (1,22)
+         DC X'2902C0C042F7'
+         DC X'4040404040'
+         DC X'2902C0C042F5'
+         DC X'6D6D6D6D'
+         DC X'2902C0C042F7'
+         DC X'404040404040404040404040404040404040404040404040'
+         $SBA (2,22)
+         DC X'4040'
+         DC X'2902C0C042F5'
+         DC X'4B607F40'
+*        DC X'2902C0C042F6'
+         DC X'2903C0C041F142F6'
+         DC X'4E'
+         DC X'2902C0C042F7'
+         DC X'7D'
+         DC X'2902C0C042F5'
+         DC X'7F604B'
+         DC X'2902C0C042F7'
+         DC X'40404040'
+         DC X'2902C0C042F4'
+         DC X'6D6D6B40406B6D6D6D6B'
+         DC X'2902C0C042F7'
+         DC X'404040404040404040404040404040'
+         $SBA (3,22)
+         DC X'40'
+         DC X'2902C0C042F5'
+         DC X'61'
+         DC X'2902C0C042F7'
+         DC X'4B7D4B7D'
+         DC X'2902C0C042F2'
+         DC X'C16D'
+         DC X'2902C0C042F7'
+         DC X'7D5C'
+         DC X'2902C0C042F5'
+         DC X'E0'
+         DC X'2902C0C042F7'
+         DC X'404040'
+         DC X'2902C0C042F4'
+         DC X'4D60606A6D6D6A406D6B6B6D406B6D'
+         DC X'2902C0C042F7'
+         DC X'4040404040404040404040'
+         $SBA (4,22)
+         DC X'2902C0C042F5'
+         DC X'6A'
+         DC X'2902C0C042F7'
+         DC X'7A4B5C7D'
+         DC X'2902C0C042F2'
+         DC X'61E060E0'
+         DC X'2902C0C042F7'
+         DC X'4B79'
+         DC X'2902C0C042F5'
+         DC X'6A40'
+         DC X'2902C0C042F7'
+         DC X'404040'
+         DC X'2902C0C042F4'
+         DC X'6D6A40406A4D6D6A6A6D5D6A6D5DE061'
+         DC X'2902C0C042F7'
+         DC X'4040404040404040'
+         $SBA (5,22)
+         DC X'2902C0C042F5'
+         DC X'6A'
+         DC X'2902C0C042F7'
+         DC X'7A4B7D4B'
+         DC X'2902C0C042F2'
+         DC X'6A6A7F6A'
+         DC X'2902C0C042F7'
+         DC X'4B5C'
+         DC X'2902C0C042F5'
+         DC X'6A'
+         DC X'2902C0C042F7'
+         DC X'4040'
+         DC X'2902C0C042F4'
+         DC X'4D40404040404040406A40406A406D61'
+         DC X'2902C0C042F7'
+         DC X'404040404040404040'
+         $SBA (6,22)
+         DC X'40'
+         DC X'2902C0C042F5'
+         DC X'E0'
+         DC X'2902C0C042F7'
+         DC X'7AA15FA15FA15FA15F'
+         DC X'2902C0C042F5'
+         DC X'4061'
+         DC X'2902C0C042F7'
+         DC X'404040404040'
+         DC X'2902C0C042F2'
+         DC X'6D6D6B40406B6D6D6D6B'
+         DC X'2902C0C042F7'
+         DC X'404040404040404040404040'
+         $SBA (7,22)
+         DC X'4040'
+         DC X'2902C0C042F1'
+         DC X'61'
+         DC X'2902C0C042F5'
+         DC X'79604B4B4B4B607D'
+         DC X'2902C0C042F1'
+         DC X'E0'
+         DC X'2902C0C042F7'
+         DC X'404040404040'
+         DC X'2902C0C042F2'
+         DC X'4D60606A6D6D6A406D406A7D406D6A406D6B4040406B'
+         $SBA (8,22)
+         DC X'40'
+         DC X'2902C0C042F1'
+         DC X'61'
+         DC X'2902C0C042F7'
+         DC X'40404040404040404040'
+         DC X'2902C0C042F1'
+         DC X'E0'
+         DC X'2902C0C042F7'
+         DC X'40404040404040'
+         DC X'2902C0C042F2'
+         DC X'6D6A40406A4D6D5D6A6A4D6D6A4D6D6AE061406D5D'
+         $SBA (9,22)
+         DC X'2902C0C042F7'
+         DC X'40'
+         DC X'2902C0C042F1'
+         DC X'79604B6B6D6D6D6D6D6B4B607D'
+         DC X'2902C0C042F7'
+         DC X'4040404040'
+         DC X'2902C0C042F2'
+         DC X'4D4040404040404040404040404040406D6140404040'
+         $SBA (13,5)
+         DC X'2902C0C042F4'
+         DC C'XXXXXXX'
+         $SBA (13,15)
+         DC X'2902C0C042F4'
+         DC C'XXXXXXXX'
+         $SBA (13,25)
+         DC X'2902C0C042F4'
+         DC C'XXX'
+         $SBA (13,32)
+         DC X'2902C0C042F4'
+         DC C'XXX'
+         $SBA (13,40)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (14,7)
+         DC X'2902C0C042F4'
+         DC C'XXX'
+         $SBA (14,15)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (14,21)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (14,25)
+         DC X'2902C0C042F4'
+         DC C'XXXX'
+         $SBA (14,31)
+         DC X'2902C0C042F4'
+         DC C'XXXX'
+         $SBA (14,40)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (14,49)
+         DC X'2902C0C042F4'
+         DC C'XXXXX'
+         $SBA (14,59)
+         DC X'2902C0C042F4'
+         DC C'X'
+         $SBA (14,61)
+         DC X'2902C0C042F4'
+         DC C'XXXXX'
+         $SBA (14,70)
+         DC X'2902C0C042F4'
+         DC C'XXXXXX'
+         $SBA (15,7)
+         DC X'2902C0C042F4'
+         DC C'XXX'
+         $SBA (15,15)
+         DC X'2902C0C042F4'
+         DC C'XXXXXXX'
+         $SBA (15,25)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (15,28)
+         DC X'2902C0C042F4'
+         DC C'XXXX'
+         $SBA (15,33)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (15,47)
+         DC X'2902C0C042F4'
+         DC C'XXX'
+         $SBA (15,53)
+         DC X'2902C0C042F4'
+         DC C'XXX'
+         $SBA (15,59)
+         DC X'2902C0C042F4'
+         DC C'XXX'
+         $SBA (15,69)
+         DC X'2902C0C042F4'
+         DC C'XXX'
+         $SBA (16,7)
+         DC X'2902C0C042F4'
+         DC C'XXX'
+         $SBA (16,15)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (16,20)
+         DC X'2902C0C042F4'
+         DC C'XXX'
+         $SBA (16,25)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (16,29)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (16,33)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (16,47)
+         DC X'2902C0C042F4'
+         DC C'XXXXXXXXX'
+         $SBA (16,59)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (16,70)
+         DC X'2902C0C042F4'
+         DC C'XXXXX'
+         $SBA (17,7)
+         DC X'2902C0C042F4'
+         DC C'XXX'
+         $SBA (17,15)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (17,21)
+         DC X'2902C0C042F4'
+         DC C'XXX'
+         $SBA (17,25)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (17,33)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (17,47)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (17,59)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (17,74)
+         DC X'2902C0C042F4'
+         DC C'XXX'
+         $SBA (18,5)
+         DC X'2902C0C042F4'
+         DC C'XXXXXXX'
+         $SBA (18,15)
+         DC X'2902C0C042F4'
+         DC C'XXXXXXXX'
+         $SBA (18,25)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (18,33)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (18,48)
+         DC X'2902C0C042F4'
+         DC C'XXXXXXX'
+         $SBA (18,59)
+         DC X'2902C0C042F4'
+         DC C'XX'
+         $SBA (18,69)
+         DC X'2902C0C042F4'
+         DC C'XXXXXXX'
+       $SBA  (20,41)
+         $SF   (SKIP)
+         $SBA  (23,1)
+         $SF   (SKIP,HI)
+         DC    C'Logon ===>'
+         $SBA  (23,12)
+         $SF   (UNPROT,HI)
+         $IC
+TKINP    DC    CL66' '
+         $SBA  (23,79)
+         $SF   (SKIP)
+TURNKEYL EQU   *-TURNKEY
+         POP   PRINT
+./ CHANGE NAME=NETSOL
+         CLI   MSGINDEX,X'0C'             , is this msg to be shown?
+         BNE   NOUSS                      , bif not
+*                                         , Now write the screen
+         LA    R3,TURNKEYL                , load length of screen data
+         L     R4,=A(TURNKEY)             , load address of screen data
+         WRITE RPL=(PTRRPL),              , send data                  X
+               OPTCD=(LBT,ERASE),         , erase screen first         X
+               AREA=(R4),                 , address is in R4           X
+               RECLEN=(R3),               , length is in R3            X
+               EXIT=WRITEND
+         B     USSOK                      , continue normal processing
+NOUSS    DS    0H                         , issue netsol message <> 12
+USSOK    DS    0H                         , logon screen has been sent
+         COPY TURNKEY                     , logon screen copy book
+//ASM     EXEC PGM=IFOX00,REGION=1024K
+//SYSLIB   DD  DISP=SHR,DSN=SYS1.UMODMAC,DCB=LRECL=32720
+//         DD  DISP=SHR,DSN=SYS2.MACLIB
+//         DD  DISP=SHR,DSN=SYS1.MACLIB
+//         DD  DISP=SHR,DSN=SYS1.AMODGEN
+//SYSUT1   DD  UNIT=VIO,SPACE=(1700,(600,100))
+//SYSUT2   DD  UNIT=VIO,SPACE=(1700,(300,50))
+//SYSUT3   DD  UNIT=VIO,SPACE=(1700,(300,50))
+//SYSPRINT DD  SYSOUT=*,DCB=BLKSIZE=1089
+//SYSPUNCH DD  DISP=(NEW,PASS,DELETE),
+//             UNIT=VIO,SPACE=(TRK,(2,2)),
+//             DCB=(BLKSIZE=80,LRECL=80,RECFM=F)
+//SYSIN    DD  *
+ISTNSC00 CSECT ,
+         NETSOL SYSTEM=VS2
+         END   ,
+//LKED    EXEC PGM=IEWL,PARM='XREF,LIST,LET,NCAL',REGION=1024K
+//SYSPRINT DD  SYSOUT=*
+//SYSLIN   DD  DISP=(OLD,DELETE,DELETE),DSN=*.ASM.SYSPUNCH
+//SYSLMOD  DD  DISP=SHR,DSN=SYS1.VTAMLIB(ISTNSC00)
+//SYSUT1   DD  UNIT=VIO,SPACE=(1024,(200,20))
+//*
+//

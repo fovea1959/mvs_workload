@@ -1,0 +1,297 @@
+//MVS0080 JOB  (SETUP),
+//             'Build Netsol',
+//             CLASS=A,
+//             MSGCLASS=A,
+//             MSGLEVEL=(1,1),
+//             COND=(0,NE),
+//             NOTIFY=WEGSCD
+//********************************************************************
+//*
+//* Name: SYS1.SETUP.CNTL(MVS0080)
+//*
+//* Desc: Build new NETSOL logon screen
+//*
+//********************************************************************
+//CLEANUP EXEC PGM=IDCAMS
+//SYSPRINT DD  SYSOUT=*
+//SYSIN    DD  *
+ DELETE SYS1.UMODMAC(TURNKEY)
+ SET MAXCC=0
+ SET LASTCC=0
+//COMP    EXEC COMPRESS,LIB='SYS1.UMODMAC'
+//COPY    EXEC PGM=IEBCOPY
+//SYSPRINT DD  SYSOUT=*
+//SYSUT1   DD  DISP=SHR,DSN=SYS1.MACLIB
+//SYSUT2   DD  DISP=SHR,DSN=SYS1.UMODMAC
+//SYSIN    DD  *
+ COPY INDD=SYSUT1,OUTDD=SYSUT2
+ SELECT MEMBER=((NETSOL,,R))
+//UPDATE  EXEC PGM=IEBUPDTE
+//SYSPRINT DD  SYSOUT=*
+//SYSUT1   DD  DISP=SHR,DSN=SYS1.UMODMAC
+//SYSUT2   DD  DISP=SHR,DSN=SYS1.UMODMAC
+//SYSIN    DD  *
+./ ADD NAME=TURNKEY
+* >>>>>>>>>>>>>>>>>>>>>> Sample Screen Layout <<<<<<<<<<<<<<<<<<<<<<<<
+*
+* ----+----1----5----2----+----3----+----4----+----5----+----6----+---
+*
+*   __________________________________________/\\\_____________________
+*   _________________________________________/\\\/_____________________
+*   ___________/\\\\\\\\\___/\\\____________/\\\/______________________
+*   ___________/\\\/////\\\_\///___________/\\\/_______________________
+*   ___________\/\\\\\\\\\\___/\\\________/\\\/________________________
+*   ____________\/\\\//////___\/\\\______/\\\/_________________________
+*   _____________\/\\\_________\/\\\____/\\\/__________________________
+*   ______________\/\\\_________\/\\\__/\\\/___________________________
+*   _______________\///__________\///__\///____________________________
+*   ___________/\\\\\\\\\\______/\\\\\\\\\________/\\\\\\\_____________
+*   __________/\\\///////\\\___/\\\///////\\\____/\\\/////\\\__________
+*   __________\///______/\\\___\/\\\_____\/\\\___/\\\____\//\\\________
+*   __________________/\\\//____\///\\\\\\\\\/___\/\\\_____\/\\\_______
+*   __________________\////\\\____/\\\///////\\\__\/\\\_____\/\\\______
+*   ______________________\//\\\__/\\\______\//\\\_\/\\\_____\/\\\_____
+*   ______________/\\\______/\\\__\//\\\______/\\\__\//\\\____/\\\_____
+*   ______________\///\\\\\\\\\/____\///\\\\\\\\\/____\///\\\\\\\/_____
+*   _________________\/////////________\/////////________\///////______
+*
+*  Your Logon command ===>
+*
+*
+         PUSH  PRINT
+         PRINT OFF
+PI       DS    0D
+PIE      $ESC
+PII      $IO   ERASE/WRITE
+PIW      $WCC  (RESETKBD,MDT)
+         $SBA  (2,1)
+         $SF   (SKIP)
+         $SBA  (2,2)
+         $SF   (UNPROT,HI)
+         DC    C'__________________________________________/\\\________C
+               _____________________'
+         $SBA  (2,78)
+         $SF   (SKIP)
+         $SBA  (2,79)
+         $SF   (UNPROT,HI)
+         $SBA  (3,1)
+         $SF   (SKIP)
+         $SBA  (3,2)
+         $SF   (UNPROT,HI)
+         DC    C'_________________________________________/\\\/________C
+               _____________________'
+         $SBA  (3,78)
+         $SF   (SKIP)
+         $SBA  (3,79)
+         $SF   (UNPROT,HI)
+         $SBA  (4,1)
+         $SF   (SKIP)
+         $SBA  (4,2)
+         $SF   (UNPROT,HI)
+         DC    C'___________/\\\\\\\\\___/\\\____________/\\\/_________C
+               _____________________'
+         $SBA  (4,78)
+         $SF   (SKIP)
+         $SBA  (4,79)
+         $SF   (UNPROT,HI)
+         $SBA  (5,1)
+         $SF   (SKIP)
+         $SBA  (5,2)
+         $SF   (UNPROT,HI)
+         DC    C'___________/\\\/////\\\_\///___________/\\\/__________C
+               _____________________'
+         $SBA  (5,78)
+         $SF   (SKIP)
+         $SBA  (5,79)
+         $SF   (UNPROT,HI)
+         $SBA  (6,1)
+         $SF   (SKIP)
+         $SBA  (6,2)
+         $SF   (UNPROT,HI)
+         DC    C'___________\/\\\\\\\\\\___/\\\________/\\\/___________C
+               _____________________'
+         $SBA  (6,78)
+         $SF   (SKIP)
+         $SBA  (6,79)
+         $SF   (UNPROT,HI)
+         $SBA  (7,1)
+         $SF   (SKIP)
+         $SBA  (7,2)
+         $SF   (UNPROT,HI)
+         DC    C'____________\/\\\//////___\/\\\______/\\\/____________C
+               _____________________'
+         $SBA  (7,78)
+         $SF   (SKIP)
+         $SBA  (7,79)
+         $SF   (UNPROT,HI)
+         $SBA  (8,1)
+         $SF   (SKIP)
+         $SBA  (8,2)
+         $SF   (UNPROT,HI)
+         DC    C'_____________\/\\\_________\/\\\____/\\\/_____________C
+               _____________________'
+         $SBA  (8,78)
+         $SF   (SKIP)
+         $SBA  (8,79)
+         $SF   (UNPROT,HI)
+         $SBA  (9,1)
+         $SF   (SKIP)
+         $SBA  (9,2)
+         $SF   (UNPROT,HI)
+         DC    C'______________\/\\\_________\/\\\__/\\\/______________C
+               _____________________'
+         $SBA  (9,78)
+         $SF   (SKIP)
+         $SBA  (9,79)
+         $SF   (UNPROT,HI)
+         $SBA  (10,1)
+         $SF   (SKIP)
+         $SBA  (10,2)
+         $SF   (UNPROT,HI)
+         DC    C'_______________\///__________\///__\///_______________C
+               _____________________'
+         $SBA  (10,78)
+         $SF   (SKIP)
+         $SBA  (10,79)
+         $SF   (UNPROT,HI)
+         $SBA  (11,1)
+         $SF   (SKIP)
+         $SBA  (11,2)
+         $SF   (UNPROT,HI)
+         DC    C'___________/\\\\\\\\\\______/\\\\\\\\\________/\\\\\\\C
+               _____________________'
+         $SBA  (11,78)
+         $SF   (SKIP)
+         $SBA  (11,79)
+         $SF   (UNPROT,HI)
+         $SBA  (12,1)
+         $SF   (SKIP)
+         $SBA  (12,2)
+         $SF   (UNPROT,HI)
+         DC    C'__________/\\\///////\\\___/\\\///////\\\____/\\\/////C
+               \\\__________________'
+         $SBA  (12,78)
+         $SF   (SKIP)
+         $SBA  (12,79)
+         $SF   (UNPROT,HI)
+         $SBA  (13,1)
+         $SF   (SKIP)
+         $SBA  (13,2)
+         $SF   (UNPROT,HI)
+         DC    C'__________\///______/\\\___\/\\\_____\/\\\___/\\\____\C
+               //\\\________________'
+         $SBA  (13,78)
+         $SF   (SKIP)
+         $SBA  (13,79)
+         $SF   (UNPROT,HI)
+         $SBA  (14,1)
+         $SF   (SKIP)
+         $SBA  (14,2)
+         $SF   (UNPROT,HI)
+         DC    C'__________________/\\\//____\///\\\\\\\\\/___\/\\\____C
+               _\/\\\_______________'
+         $SBA  (14,78)
+         $SF   (SKIP)
+         $SBA  (14,79)
+         $SF   (UNPROT,HI)
+         $SBA  (15,1)
+         $SF   (SKIP)
+         $SBA  (15,2)
+         $SF   (UNPROT,HI)
+         DC    C'__________________\////\\\____/\\\///////\\\__\/\\\___C
+               __\/\\\______________'
+         $SBA  (15,78)
+         $SF   (SKIP)
+         $SBA  (15,79)
+         $SF   (UNPROT,HI)
+         $SBA  (16,1)
+         $SF   (SKIP)
+         $SBA  (16,2)
+         $SF   (UNPROT,HI)
+         DC    C'______________________\//\\\__/\\\______\//\\\_\/\\\__C
+               ___\/\\\_____________'
+         $SBA  (16,78)
+         $SF   (SKIP)
+         $SBA  (16,79)
+         $SF   (UNPROT,HI)
+         $SBA  (17,1)
+         $SF   (SKIP)
+         $SBA  (17,2)
+         $SF   (UNPROT,HI)
+         DC    C'______________/\\\______/\\\__\//\\\______/\\\__\//\\\C
+               ____/\\\_____________'
+         $SBA  (17,78)
+         $SF   (SKIP)
+         $SBA  (17,79)
+         $SF   (UNPROT,HI)
+         $SBA  (18,1)
+         $SF   (SKIP)
+         $SBA  (18,2)
+         $SF   (UNPROT,HI)
+         DC    C'______________\///\\\\\\\\\/____\///\\\\\\\\\/____\///C
+               \\\\\\\/_____________'
+         $SBA  (18,78)
+         $SF   (SKIP)
+         $SBA  (18,79)
+         $SF   (UNPROT,HI)
+         $SBA  (19,1)
+         $SF   (SKIP)
+         $SBA  (19,2)
+         $SF   (UNPROT,HI)
+         DC    C'_________________\/////////________\/////////________\C
+               ///////______________'
+         $SBA  (19,78)
+         $SF   (SKIP)
+         $SBA  (19,79)
+         $SF   (UNPROT,HI)
+         $SBA  (21,1)
+         $SF   (SKIP,HI)
+         DC    C'Your Logon command ===>ç%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%C
+               %%%%%%%%%%%%%%%%%%%%%%%%'
+         $SBA  (21,80)
+         $SF   (SKIP)
+         $SBA  (23,1)
+         $SF   (SKIP,HI)
+TKDEV    DC    CL78' '
+         $SBA  (23,80)
+         $SF   (SKIP)
+PIL      EQU   *-PI
+         POP   PRINT
+./ CHANGE NAME=NETSOL
+         CLI   MSGINDEX,X'0C'             , is this msg to be shown?
+         BNE   NOUSS                      , bif not
+*                                         , Now write the screen
+         LA    R3,PIL                     , load length of screen data
+         L     R4,=A(PI)                  , load address of screen data
+         WRITE RPL=(PTRRPL),              , send data                  X
+               OPTCD=(LBT,ERASE),         , erase screen first         X
+               AREA=(R4),                 , address is in R4           X
+               RECLEN=(R3),               , length is in R3            X
+               EXIT=WRITEND
+         B     USSOK                      , continue normal processing
+NOUSS    DS    0H                         , issue netsol message <> 12
+USSOK    DS    0H                         , logon screen has been sent
+         COPY TURNKEY                     , logon screen copy book
+//ASM     EXEC PGM=IFOX00,REGION=1024K
+//SYSLIB   DD  DISP=SHR,DSN=SYS1.UMODMAC,DCB=LRECL=32720
+//         DD  DISP=SHR,DSN=SYS2.MACLIB
+//         DD  DISP=SHR,DSN=SYS1.MACLIB
+//         DD  DISP=SHR,DSN=SYS1.AMODGEN
+//SYSUT1   DD  UNIT=VIO,SPACE=(1700,(600,100))
+//SYSUT2   DD  UNIT=VIO,SPACE=(1700,(300,50))
+//SYSUT3   DD  UNIT=VIO,SPACE=(1700,(300,50))
+//SYSPRINT DD  SYSOUT=*,DCB=BLKSIZE=1089
+//SYSPUNCH DD  DISP=(NEW,PASS,DELETE),
+//             UNIT=VIO,SPACE=(TRK,(2,2)),
+//             DCB=(BLKSIZE=80,LRECL=80,RECFM=F)
+//SYSIN    DD  *
+ISTNSC00 CSECT ,
+         NETSOL SYSTEM=VS2
+         END   ,
+//LKED    EXEC PGM=IEWL,PARM='XREF,LIST,LET,NCAL',REGION=1024K
+//SYSPRINT DD  SYSOUT=*
+//SYSLIN   DD  DISP=(OLD,DELETE,DELETE),DSN=*.ASM.SYSPUNCH
+//SYSLMOD  DD  DISP=SHR,DSN=SYS1.VTAMLIB(ISTNSC00)
+//SYSUT1   DD  UNIT=VIO,SPACE=(1024,(200,20))
+//*
+//

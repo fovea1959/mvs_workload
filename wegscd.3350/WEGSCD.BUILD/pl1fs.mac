@@ -1,0 +1,424 @@
+//ASMSIMP8 JOB (PL1ASM),'MARKUS LOEW',
+//    CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1),
+//    REGION=256K
+//*-------------------------------------------------------------------
+//PREP01 EXEC PGM=IEFBR14
+//SYSLMOD  DD  DSNAME=WEGSCD.CALL.ASMSIMP8(GO),DISP=(MOD,DELETE),
+//   UNIT=SYSDA,SPACE=(1024,(50,20,1),RLSE)
+//*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//STEP011 EXEC ASMFC
+//ASM.SYSPUNCH DD DSNAME=&&LOADSPT,DISP=(MOD,PASS),UNIT=SYSSQ,
+//             SPACE=(80,(250,100))
+//ASM.SYSIN DD *
+**********************************************************************
+* PL/I calls Assembler:     CALL SCRPUT(STRING EXPRESSION) ;
+* SC33-0006-3_PLIpgmGde_Dec74 page 170
+**********************************************************************
+SCRPUT   CSECT  ,                                                    *
+         STM    14,11,12(13)                                         *
+         BALR   10,0                                                 *
+         USING  *,10                                                 *
+         LA     4,SAVEAREA                                           *
+         ST     13,SAVEAREA+4                                        *
+         LA     13,SAVEAREA                                          *
+*---------------------------------------------------------------------
+* This is the place for the Assembler subprocedure code              *
+*                                     get 1st argument
+         L      3,0(1)                      ADDR OF FIRST ARG
+         N      3,=X'00FFFFFF'               CLEAR LAST ARG FLAG
+         L      4,0(3)                       ADDRESS
+         ST     4,STADDR
+         LH     6,6(3)                       USEDLEN
+         STH    6,STLENG
+*
+*
+*  (CODE MODIFIED)  TPUT  STREAM,STREAMLN,FULLSCR
+         CNOP  0,4
+         L     0,TSID                   LOAD TSID & SIZE
+         L     1,STADDR                 LOAD BUFFER ADDRESS
+         ICM   1,8,OPTBYTE                 LOAD OPTION BYTE
+         SVC   93                       ISSUE TGET/TPUT SVC
+*
+*---------------------------------------------------------------------
+         L      13,4(13)                                             *
+         LM     14,11,12(13)                                         *
+         BR     14                                                   *
+*                                                                    *
+SAVEAREA DC     20F'0'                                               *
+*---------------------------------------------------------------------
+*
+STADDR   DS    F
+TSID     DC    AL2(0)
+STLENG   DS    H
+OPTBYTE  DC    AL1(3,0)
+*
+         END    ,
+/*
+//*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//STEP012 EXEC ASMFC
+//ASM.SYSPUNCH DD DSNAME=&&LOADSGT,DISP=(MOD,PASS),UNIT=SYSSQ,
+//             SPACE=(80,(250,100))
+//ASM.SYSIN DD *
+**********************************************************************
+* PL/I calls Assembler:     CALL SCRGET(STRING VARIABLE) ;
+* SC33-0006-3_PLIpgmGde_Dec74 page 170
+**********************************************************************
+SCRGET   CSECT  ,                                                    *
+         STM    14,11,12(13)                                         *
+         BALR   10,0                                                 *
+         USING  *,10                                                 *
+         LA     4,SAVEAREA                                           *
+         ST     13,SAVEAREA+4                                        *
+         LA     13,SAVEAREA                                          *
+*---------------------------------------------------------------------
+* This is the place for the Assembler subprocedure code              *
+*                                     get 1st argument
+         L      3,0(1)                      ADDR OF FIRST ARG
+         N      3,=X'00FFFFFF'               CLEAR LAST ARG FLAG
+         L      4,0(3)                       ADDRESS
+         ST     4,INADDR
+         LH     6,4(3)                       MAXLEN
+         STH    6,INLENG
+         AR     4,6
+CLEAR    BCT    4,CONT                       ZEROES INPUT BUFFER
+CONT     MVI    0(4),X'00'
+         BCT    6,CLEAR
+*
+*  (CODE MODIFIED)  TGET  INBUF,INBUFLN,ASIS
+         CNOP  0,4
+         LH    0,INLENG                 LOAD SIZE
+         L     1,INADDR                 LOAD BUFFER ADDRESS
+         ICM   1,8,IPTBYTE              LOAD OPTION BYTE
+         ICM   0,8,IPTBYTE+1            CLEAR HIGH ORDER BYTE
+         SVC   93                       ISSUE SVC
+**
+*---------------------------------------------------------------------
+         L      13,4(13)                                             *
+         LM     14,11,12(13)                                         *
+         BR     14                                                   *
+*                                                                    *
+SAVEAREA DC     20F'0'                                               *
+*---------------------------------------------------------------------
+*
+INADDR   DS    F
+ISID     DC    AL2(0)
+INLENG   DS    H
+IPTBYTE  DC    AL1(129,0)
+*
+         END    ,
+/*
+//*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//STEP01B EXEC ASMFC
+//ASM.SYSPUNCH DD DSNAME=&&LOADINI,DISP=(MOD,PASS),UNIT=SYSSQ,
+//             SPACE=(80,(250,100))
+//ASM.SYSIN DD *
+**********************************************************************
+* PL/I calls Assembler:     CALL SCRINIT ;
+* SC33-0006-3_PLIpgmGde_Dec74 page 170
+**********************************************************************
+SCRINIT  CSECT  ,                                                    *
+         STM    14,11,12(13)                                         *
+         BALR   10,0                                                 *
+         USING  *,10                                                 *
+         LA     4,SAVEAREA                                           *
+         ST     13,SAVEAREA+4                                        *
+         LA     13,SAVEAREA                                          *
+*---------------------------------------------------------------------
+* This is the place for the Assembler subprocedure code              *
+*
+         STFSMODE ON,INITIAL=YES
+         STTMPMD ON
+*
+*---------------------------------------------------------------------
+         L      13,4(13)                                             *
+         LM     14,11,12(13)                                         *
+         BR     14                                                   *
+*                                                                    *
+SAVEAREA DC     20F'0'                                               *
+*---------------------------------------------------------------------
+*
+         END    ,
+/*
+//*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//STEP01C EXEC ASMFC
+//ASM.SYSPUNCH DD DSNAME=&&LOADLVE,DISP=(MOD,PASS),UNIT=SYSSQ,
+//             SPACE=(80,(250,100))
+//ASM.SYSIN DD *
+**********************************************************************
+* PL/I calls Assembler:     CALL SCREXIT ;
+* SC33-0006-3_PLIpgmGde_Dec74 page 170
+**********************************************************************
+SCREXIT  CSECT  ,                                                    *
+         STM    14,11,12(13)                                         *
+         BALR   10,0                                                 *
+         USING  *,10                                                 *
+         LA     4,SAVEAREA                                           *
+         ST     13,SAVEAREA+4                                        *
+         LA     13,SAVEAREA                                          *
+*---------------------------------------------------------------------
+* This is the place for the Assembler subprocedure code              *
+*
+         STLINENO LINE=1
+         STFSMODE OFF
+         STTMPMD OFF
+*
+*---------------------------------------------------------------------
+         L      13,4(13)                                             *
+         LM     14,11,12(13)                                         *
+         BR     14                                                   *
+*                                                                    *
+SAVEAREA DC     20F'0'                                               *
+*---------------------------------------------------------------------
+*
+         END    ,
+/*
+//*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//STEP02B EXEC PL1LFCL,PARM.PL1L='NEST,ATR',PARM.LKED='NOXREF'
+//PL1L.SYSIN DD *
+ PL1ASM :
+   PROCEDURE OPTIONS(MAIN) ;
+
+     DECLARE
+
+     1 BIN_CC STATIC ,
+       2 CTRL_ESC      BIT(8) INITIAL('00100111'B) ,
+       2 WCC_BASE      BIT(8) INITIAL('11000010'B) ,
+       2 ATR_PROTECT   BIT(8) INITIAL('00100000'B) , /* 11 */
+       2 ATR_NUMERIC   BIT(8) INITIAL('00010000'B) , /*  = SKIP */
+       2 ATR_INTENSE   BIT(8) INITIAL('00001000'B) , /* 11 */
+       2 ATR_INVISIBLE BIT(8) INITIAL('00001100'B) , /*  = INVISIBLE */
+       2 ATR_MDT       BIT(8) INITIAL('00000001'B) , /*  */
+       2 CMD_SF        BIT(8) INITIAL('00011101'B) ,
+       2 CMD_SBA       BIT(8) INITIAL('00010001'B) ,
+       2 CMD_IC        BIT(8) INITIAL('00010011'B) ,
+       2 CMD_PT        BIT(8) INITIAL('00000101'B) ,
+       2 CMD_RA        BIT(8) INITIAL('00111100'B) ,
+       2 CMD_EUA       BIT(8) INITIAL('00010010'B) ,
+       2 CMD_SFE       BIT(8) INITIAL('00101001'B) ,
+       2 CMD_FLDATR    BIT(8) INITIAL('11000000'B) ,
+       2 CMD_EXTHLI    BIT(8) INITIAL('01000001'B) ,
+       2 CMD_SCOLOR    BIT(8) INITIAL('01000010'B) ,
+       2 ATR_DEFLT     BIT(8) INITIAL('00000000'B) ,
+       2 ATR_ONE       BIT(8) INITIAL('00000001'B) ,
+       2 ATR_TWO       BIT(8) INITIAL('00000010'B) ,
+       2 ATR_THREE     BIT(8) INITIAL('00000011'B) ,
+       2 ATR_BLINK     BIT(8) INITIAL('11110001'B) ,
+       2 ATR_REVERS    BIT(8) INITIAL('11110010'B) ,
+       2 ATR_USCOR     BIT(8) INITIAL('11110011'B) ,
+       2 ATR_BLUE      BIT(8) INITIAL('11110001'B) ,
+       2 ATR_RED       BIT(8) INITIAL('11110010'B) ,
+       2 ATR_PINK      BIT(8) INITIAL('11110011'B) ,
+       2 ATR_GREEN     BIT(8) INITIAL('11110100'B) ,
+       2 ATR_CYAN      BIT(8) INITIAL('11110101'B) ,
+       2 ATR_YELLOW    BIT(8) INITIAL('11110110'B) ,
+       2 ATR_WHITE     BIT(8) INITIAL('11110111'B) ,
+       2 COORDS(0:63)  BIT(8) INITIAL                    ('01000000'B,
+          '11000001'B,'11000010'B,'11000011'B,'11000100'B,'11000101'B,
+          '11000110'B,'11000111'B,'11001000'B,'11001001'B,
+          '01001010'B,'01001011'B,'01001100'B,'01001101'B,'01001110'B,
+                                              '01001111'B,'01010000'B,
+          '11010001'B,'11010010'B,'11010011'B,'11010100'B,'11010101'B,
+          '11010110'B,'11010111'B,'11011000'B,'11011001'B,
+          '01011010'B,'01011011'B,'01011100'B,'01011101'B,'01011110'B,
+                                              '01011111'B,'01100000'B,
+          '01100001'B,'11100010'B,'11100011'B,'11100100'B,'11100101'B,
+          '11100110'B,'11100111'B,'11101000'B,'11101001'B,
+          '01101010'B,'01101011'B,'01101100'B,'01101101'B,'01101110'B,
+                                              '01101111'B,'11110000'B,
+          '11110001'B,'11110010'B,'11110011'B,'11110100'B,'11110101'B,
+          '11110110'B,'11110111'B,'11111000'B,'11111001'B,
+          '01111010'B,'01111011'B,'01111100'B,'01111101'B,'01111110'B,
+                                              '01111111'B) ,
+
+       CCP             POINTER ,
+
+     1 CC BASED(CCP) ,
+       2 ESC           CHARACTER (1) ,
+       2 WCC           CHARACTER (1) ,
+       2 PROTECT       CHARACTER (1) , /* 11 */
+       2 NUMERIC       CHARACTER (1) , /*  = SKIP */
+       2 INTENSE       CHARACTER (1) , /* 11 */
+       2 INVISIBLE     CHARACTER (1) , /*  = INVISIBLE */
+       2 MDT           CHARACTER (1) , /*  */
+       2 SF            CHARACTER (1) ,
+       2 SBA           CHARACTER (1) ,
+       2 IC            CHARACTER (1) ,
+       2 PT            CHARACTER (1) ,
+       2 RA            CHARACTER (1) ,
+       2 EUA           CHARACTER (1) ,
+       2 SFE           CHARACTER (1) ,
+       2 FLDATR        CHARACTER (1) ,
+       2 EXTHLI        CHARACTER (1) ,
+       2 SCOLOR        CHARACTER (1) ,
+       2 DEFLT         CHARACTER (1) ,
+       2 ONE           CHARACTER (1) ,
+       2 TWO           CHARACTER (1) ,
+       2 THREE         CHARACTER (1) ,
+       2 BLINK         CHARACTER (1) ,
+       2 REVERS        CHARACTER (1) ,
+       2 USCOR         CHARACTER (1) ,
+       2 BLUE          CHARACTER (1) ,
+       2 RED           CHARACTER (1) ,
+       2 PINK          CHARACTER (1) ,
+       2 GREEN         CHARACTER (1) ,
+       2 CYAN          CHARACTER (1) ,
+       2 YELLOW        CHARACTER (1) ,
+       2 WHITE         CHARACTER (1) ,
+       2 COCHAR(0:63)  CHARACTER (1) ;
+   /*---------------------------------------------------------------*/
+
+     DECLARE
+
+     ( ADDR ,
+       SUBSTR ,
+       TRUNC ,
+       MOD )           BUILTIN ,
+
+     ( SCRINIT ,
+       SCREXIT ,
+       SCRPUT ,
+       SCRGET )        ENTRY EXTERNAL ,
+
+       SYSPRINT        FILE PRINT ,
+
+       INBUFF          CHARACTER(2048) ,
+
+       RESULT          CHARACTER(10) VARYING ,
+
+       SCLOC           CHARACTER(2) INITIAL('') ,
+
+     ( N ,
+       I ,
+       J )             BINARY(31) FIXED INITIAL (0) ;
+   /*===============================================================*/
+     HEXBYTE :
+       PROCEDURE (RESULT,INVALUE) ;
+         DECLARE
+           RESULT            CHARACTER(2) ,
+           INVALUE           CHARACTER(*) ,
+           P                 POINTER ,
+           VALUE             BIT(8) BASED(P) ,
+           DIGITS(0:15)      CHARACTER(1) INITIAL ('0','1','2','3',
+                                                   '4','5','6','7',
+                                                   '8','9','A','B',
+                                                   'C','D','E','F') ;
+     START_HEXBYTE :
+       P = ADDR(INVALUE) ;
+       RESULT = DIGITS(TRUNC(VALUE/16))××DIGITS(MOD(VALUE,16)) ;
+     END HEXBYTE ;
+   /*---------------------------------------------------------------*/
+     XY :
+       PROCEDURE (X,Y,B) ;
+         DECLARE
+           ( X ,
+             Y ,
+             A ,
+             C1 ,
+             C2 )             BINARY(31) FIXED ,
+             B                CHARACTER(2) ,
+             P                POINTER ;
+       START_XY :
+         A = (Y-1)*80+X-1 ;
+         C1 = TRUNC(A/64) ;
+         C2 = MOD(A,64) ;
+         B = COCHAR(C1)××COCHAR(C2) ;
+       END XY ;
+   /*---------------------------------------------------------------*/
+     CLRSCR :
+       PROCEDURE ;
+       START_CLRSCR :
+         CALL SCRPUT(ESC××'5'××WCC××SBA××'  ') ;
+       END CLRSCR ;
+   /*---------------------------------------------------------------*/
+     WHEREXY :
+       PROCEDURE (X,Y,SCLOC) ;
+         DECLARE
+         ( X ,
+           Y )           BINARY(31) FIXED ,
+         ( SCLOC ,
+           TCLOC )       CHARACTER(2) ;
+       START_WHEREXY :
+         DO X = 1 TO 80 ;
+           DO Y = 1 TO 50 ;
+             CALL XY(X,Y,TCLOC) ;
+             IF TCLOC=SCLOC THEN
+               RETURN ;
+           END ;
+         END ;
+       END WHEREXY ;
+   /*---------------------------------------------------------------*/
+     GOTOXY :
+       PROCEDURE (X,Y) ;
+         DECLARE
+         ( X ,
+           Y )           BINARY(31) FIXED ,
+           SCLOC         CHARACTER(2) ;
+       START_GOTOXY :
+         CALL XY(X,Y,SCLOC) ;
+         CALL SCRPUT(WCC××SBA××SCLOC) ;
+       END GOTOXY ;
+   /*---------------------------------------------------------------*/
+     DISPLAY :
+       PROCEDURE (X,Y,TEXT) ;
+         DECLARE
+         ( X ,
+           Y )           BINARY(31) FIXED ,
+           TEXT          CHARACTER (*) ,
+           SCLOC         CHARACTER(2) ,
+           READONLY      BIT(1) INITIAL('1'B) ;
+       START_DISPLAY :
+         IF X<0 THEN
+           DO ;
+             READONLY = '0'B ;
+             X = -X ;
+           END ;
+         CALL XY(X,Y,SCLOC) ;
+         IF READONLY THEN
+           CALL SCRPUT(WCC××SBA××SCLOC××SF××'8'××TEXT) ;
+         ELSE /* 'I'=MDT ON, 'H'=MDT OFF */
+           CALL SCRPUT(WCC××SBA××SCLOC××SF××'I'××TEXT) ;
+       END DISPLAY ;
+   /*===============================================================*/
+
+   DECLARE
+     ( R1 ,
+       R2 ,
+       R3 )            CHARACTER(2) INITIAL('') ,
+     ( LASTX ,
+       LASTY )         BINARY(31) FIXED INITIAL (1) ;
+
+   START_PL1ASM :
+     CCP = ADDR(BIN_CC) ;
+     CALL SCRINIT ;
+     DO WHILE (R1^='F3') ;
+       CALL CLRSCR ;
+       CALL DISPLAY(N+33,N+10,'Hello World!') ;
+       CALL DISPLAY(N+33,N+11,'AID    =') ;
+       CALL DISPLAY(N+33,N+12,'Cursor =') ;
+       CALL DISPLAY(N+42,N+11,R1) ;
+       CALL DISPLAY(N+42,N+12,R2××R3) ;
+       CALL GOTOXY(LASTX,LASTY) ;
+       CALL SCRGET(INBUFF) ;
+       CALL WHEREXY (LASTX,LASTY,SUBSTR(INBUFF,2,2)) ;
+       CALL HEXBYTE(R1,SUBSTR(INBUFF,1,1)) ;
+       CALL HEXBYTE(R2,SUBSTR(INBUFF,2,1)) ;
+       CALL HEXBYTE(R3,SUBSTR(INBUFF,3,1)) ;
+     END ;
+     CALL SCREXIT ;
+   END PL1ASM ;
+/*
+//*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//LKED.SYSLMOD DD DSNAME=WEGSCD.CALL.ASMSIMP8(GO),DISP=(,CATLG),
+//   UNIT=DISK,SPACE=(1024,(50,20,1),RLSE)
+//LKED.SYSLIN  DD DSNAME=&&LOADSET,DISP=(OLD,DELETE)
+//             DD DSNAME=&&LOADINI,DISP=(OLD,DELETE)
+//             DD DSNAME=&&LOADLVE,DISP=(OLD,DELETE)
+//             DD DSNAME=&&LOADSPT,DISP=(OLD,DELETE)
+//             DD DSNAME=&&LOADSGT,DISP=(OLD,DELETE)
+//
