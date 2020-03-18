@@ -1,5 +1,6 @@
 //GOTHIC   JOB (001),'RUN GOTHIC',                                      00010000
 //             CLASS=A,MSGCLASS=A,MSGLEVEL=(1,1),REGION=128K            00020000
+//JOBLIB    DD DSN=WEGSCD.LOADLIB,DISP=SHR
 //*
 //* ¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢¢
 //* Above are cent signs (ascii x'A2')
