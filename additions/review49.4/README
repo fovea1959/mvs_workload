@@ -1,0 +1,8 @@
+Got the review 49.4 zip files, unzipped the .xmi files into this directory.
+"dasdload dasdload.ctl rev494.3350"
+IPL MVS. 
+"attach 34e 3350 rev494.3350"
+"/v 34e,online"
+"/m 34e,vol=(sl,rev494)"
+Run install.jcl.
+Need to reipl (CLPA?).
