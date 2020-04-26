@@ -1,0 +1,17 @@
+//WEGSCD$ JOB (DOUG,5278),BUILD.DATE,CLASS=A,MSGCLASS=X
+//*--------------------------------------------------------------*
+//*       INSTALLATION OF THE AFDSC 'DISPLAY ACTIVE' COMMAND.    *
+//*       ANY QUESTIONS SHOULD BE REFERRED TO LT OHORA.          *
+//*--------------------------------------------------------------*
+//DA       EXEC ASMGCL,PARM.ASM='RENT,OBJECT,NODECK,ALIGN,NOLIST',
+//         PARM.LKED='LIST,LET,MAP,XREF,RENT',
+//         MAC1='SYS1.AMODGEN'
+//ASM.SYSPRINT DD SYSOUT=*
+//ASM.SYSIN DD DSN=CBT249.FILE300(DA),DISP=SHR
+//LKED.SYSLMOD DD DSN=SYS2.CMDLIB,DISP=SHR
+//LKED.SYSPRINT DD SYSOUT=*
+//LKED.SYSIN  DD *
+ SETCODE AC(1)
+ NAME DA(R)
+/*
+//

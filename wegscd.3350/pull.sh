@@ -4,7 +4,7 @@ pull1() {
  mkdir $1
  cd $1
  rm *.mac
- dasdpdsu ../../../wegscd.3350 $1 ASCII
+ dasdpdsu ../../../dasd2/wegscd.3350 $1 ASCII
  cd ..
 }
 

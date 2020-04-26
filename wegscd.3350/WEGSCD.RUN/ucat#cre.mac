@@ -1,0 +1,16 @@
+//IDCAMS    JOB (1),IDCAMS.CBT421,CLASS=A,MSGCLASS=X
+//IDCAMS01 EXEC PGM=IDCAMS,REGION=4096K
+//SYSPRINT   DD SYSOUT=*
+//CBT452     DD VOL=SER=CBT452,UNIT=3380,DISP=SHR
+//SYSIN      DD *
+
+   DELETE SYS1.UCAT.CBT452 UCAT PURGE FORCE FILE(CBT452)
+
+   DEFINE UCAT ( NAME (SYS1.UCAT.CBT452) -
+                 VOL (CBT452) -
+                 FILE (CBT452) -
+                 CYL (10) -
+                 BUFSP (8192) -
+                 NRVBL -
+               )
+//
