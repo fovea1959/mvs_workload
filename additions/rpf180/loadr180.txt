@@ -1,0 +1,29 @@
+//LOADRPF JOB 01,RPF180,CLASS=A,MSGCLASS=X,REGION=2048K
+//*--------------------------------------------------------------------*
+//*        Load the JCL library to install RPF                         *
+//*        This library contains a few jobs to install RPF 1.8.0       *
+//*        After loading the library run job INSTRPF to install        *
+//*        the new version. This version is prepared to run in         *
+//*        addressing mode 31 and will run fine on MVS38J,             *
+//*        MVS/380, MVS/XA, MVS/ESA, OS/390 and z/OS.                  *
+//*        There are also some additional jobs present to customize    *
+//*        RPF 1.8.0                                                   *
+//*                                                                    *
+//*        Expect a non zero return code in step01                     *
+//*--------------------------------------------------------------------*
+//STEP01  EXEC PGM=IDCAMS
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD *
+ DELETE RPF.INSTJCL NONVSAM
+/*
+//STEP02  EXEC PGM=IEBCOPY
+//SYSPRINT DD SYSOUT=*
+//IN       DD DSN=TAPE.V1R8M0.SRPFJCL,UNIT=TAPE,VOL=SER=RPF180,
+//            DISP=OLD,LABEL=(4,SL)
+//OUT      DD DSN=RPF.INSTJCL,UNIT=SYSDA,VOL=SER=PUB000,
+//            SPACE=(CYL,(1,1,5)),DCB=SYS1.MACLIB,
+//            DISP=(NEW,CATLG,DELETE)
+//SYSIN    DD *
+ COPY INDD=IN,OUTDD=OUT
+/*
+//         
