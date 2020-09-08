@@ -1,0 +1,15 @@
+ /* ---------------------------------------------------------------- */
+ /* SMF TYPE 7X (COMMON HEADER FOR ALL 7X RECORDS.                   */
+ /* ---------------------------------------------------------------- */
+ /*
+ DCL  1  SMF7X                     UNALIGNED BASED(SMFP),
+ */
+     5 SMF7XFLG BIT(8),         /* SYSTEM INDICATOR */
+     5 SMF7XRTY BIT(8),         /* RECORD TYPE */
+     5 SMF7XTME FIXED BIN(31),  /* SMF TIME (HUNDREDTHS OF SECOND */
+     5 SMF7XDTE FIXED DEC(7),   /* SMF DATE 00YYDDDF */
+     5 SMF7XSID CHAR(4),        /* SMF SID */
+     5 SMF7XSIZ FIXED BIN(15),  /* SIZE OF COMMON SECTION */
+     5 SMF7XIST FIXED DEC(7),   /* MF/1 INTERVAL START 0HHMMSSF */
+     5 SMF7XDAT FIXED DEC(7),   /* MF/1 INTERVAL START 00YYDDDF */
+     5 SMF7XINT FIXED DEC(7);   /* MF/1 INTERVAL LENGTH MMSSTTTF */

@@ -1,0 +1,96 @@
+//WEGSCD$  JOB (SYS),'ASSIST MACRO testing',CLASS=A,MSGCLASS=X
+//PI4     EXEC ASSIST,PARM='BATCH,MACRO=H,NOCPAGE'
+//SYSIN     DD *
+$JOB     ASSIST XREF=3,P=1000,NOCPAGE,R=10000
+*SYSLIB  EQUREGS,CALL,SAVE,RETURN
+         EQUREGS
+MAIN     CSECT
+         USING MAIN,R15
+         B     START
+         DC    C'MAIN    '
+*        DC    C'&SYSDATE'
+*        DC    C'&SYSTIME'
+         DC    C'V1R0.00'
+         DS    0H
+*
+START    STM   R14,R12,12(R13)        SAVE THOSE REGISTERS
+         DROP  R15
+         LR    R12,R15
+         USING MAIN,R12
+         LA    R14,SAVEAREA
+         ST    R13,4(R14)
+         ST    R14,8(R13)
+         LR    R13,R14
+*
+* All set up
+*
+         XDUMP DAREA,DAREAL
+*
+         LA    R1,ARGLIST
+         LA    R15,ADDTEST
+         BALR  R14,R15
+*
+         XDUMP DAREA,DAREAL
+*
+* All done
+*
+         L     R13,4(R13)
+         LM    R14,R12,12(R13)
+         SR    R15,R15
+         BR    R14
+         DROP  R12
+*
+SAVEAREA DC    18F'0'
+*
+ADDTEST  EQU   *
+         USING ADDTEST,R15
+         B     ADDSTART
+         DC    C'SUB     '
+*        DC    C'&SYSDATE'
+*        DC    C'&SYSTIME'
+         DC    C'V1R0.00'
+         DS    0H
+*
+ADDSTART STM   R14,R12,12(R13)        SAVE THOSE REGISTERS
+         DROP  R15
+         LR    R12,R15
+         USING ADDTEST,R12
+         LA    R14,SUBSA
+         ST    R13,4(R14)
+         ST    R14,8(R13)
+         LR    R13,R14
+*
+         XDUMP
+*
+         L     R2,0(R1)          POINT R2 TO FIRST ARG
+         L     R3,4(R1)          POINT R3 TO SECOND ARG
+         L     R4,8(R1)          POINT R4 TO 3RD ARG
+*
+         L     R5,0(R2)          GET FIRST ARG
+         L     R6,0(R3)          GET 2ND ARG
+         LR    R7,R5
+         AR    R7,R6
+*
+         XDUMP
+*
+         ST    R7,0(R4)
+*
+         L     R13,4(R13)
+         LM    R14,R12,12(R13)
+         SR    R15,R15
+         BR    R14
+         DROP  R12
+*
+SUBSA    DC    18F'0'
+DAREA    DC    F'0'
+ARGLIST  DC    A(ARG1)
+         DC    A(ARG2)
+         DC    A(ARG3)
+ARG1     DC    F'1'
+ARG2     DC    F'2'
+ARG3     DC    F'0'
+DAREAL   EQU   *-DAREA
+         LTORG
+         END
+$ENTRY
+/*

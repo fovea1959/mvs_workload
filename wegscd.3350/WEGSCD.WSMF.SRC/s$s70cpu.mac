@@ -1,0 +1,12 @@
+ /* ---------------------------------------------------------------- */
+ /* SMF TYPE 70 (MF/1 CPU ACTIVITY), CPU DATA SECTION                */
+ /* ---------------------------------------------------------------- */
+ /*
+ DCL  1  SMF70CPUDATA UNALIGNED BASED(SMF70CPUDATA_P)
+ */
+     5 SMF70WAT BIT(64),        /* SMF70WAT/SMF70WAT2 ARE REALLY 64 */
+     5 SMF70CID FIXED BIN(15),  /* CPU ID (0 OR 1) */
+     5 SMF70RV3 BIT(8),         /* RESERVED */
+     5 SMF70CNF BIT(8),         /* CONFIGURATION ACTIVITY INDICATOR */
+     5 SMF70RV4 BIT(8),         /* RESERVED */
+     5 SMF70SER CHAR(3);        /* CPU SERIAL, 6 HEX DIGITS */

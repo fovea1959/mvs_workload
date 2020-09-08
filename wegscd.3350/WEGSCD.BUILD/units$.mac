@@ -1,0 +1,13 @@
+//WEGSCDU$ JOB (),'BUILD UNITS',CLASS=A,MSGCLASS=X
+//* ********************************************************
+//* *  INSTALL THE 'UNITS' TSO COMMAND                     *
+//* ********************************************************
+//ASSEMH EXEC ASMGCL,
+//             PARM.ASM='OBJECT,NODECK,TERM,XREF(SHORT)',
+//             PARM.LKED='LIST,MAP,RENT,REUS,REFR'
+//ASM.SYSIN DD DSN=WEGSCD.BUILD(UNITS),DISP=SHR
+//ASM.SYSTERM DD SYSOUT=*
+//LKED.SYSLMOD DD DSN=SYS2.CMDLIB,DISP=SHR
+//LKED.SYSIN DD *
+ NAME UNITS(R)
+/*

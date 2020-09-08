@@ -1,0 +1,8 @@
+ /* ACCOUNTING SECTION                  */
+ /*
+ DCL  1  SMF4ACCT                  UNALIGNED BASED(SMF4ACCTP),
+ */
+         5 SMF4LNTH                BIT(8),
+         5 SMF4SETM                BIT(24),
+         5 SMF4NAF                 BIT(8),
+         5 SMF4ACTF                CHAR(0);

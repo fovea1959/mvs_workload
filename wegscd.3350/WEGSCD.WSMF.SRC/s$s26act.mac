@@ -1,0 +1,15 @@
+ /* ---------------------------------------------------------------- */
+ /*                SMF TYPE 26 (JES2 JOB PURGE) ACTUALS SECTION      */
+ /* ---------------------------------------------------------------- */
+ /*
+ DCL  1  SMF26ACT                  UNALIGNED BASED(SMFP),
+ */
+         5 SMF26LN3                FIXED BIN(15),
+         5 SMF26RV4                FIXED BIN(15),
+         5 SMF26ICD                FIXED BIN(31),
+         5 SMF26XLN                FIXED BIN(31),
+         5 SMF26XPU                FIXED BIN(31),
+         5 SMF26RID                CHAR(4),
+         5 SMF26CID                CHAR(4),
+         5 SMF26XID                CHAR(4),
+         5 SMF26OID                CHAR(4);

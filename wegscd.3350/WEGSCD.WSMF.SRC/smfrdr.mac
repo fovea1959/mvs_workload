@@ -1,0 +1,199 @@
+ /* READ SMF DATA AND DISPATCH TO P$** HANDLERS */
+ SMFRDR: PROC (PARM_STRING);
+ DCL   PARM_STRING           CHAR(100) VARYING;
+ DCL   SMFDATA               INPUT RECORD;
+ DCL   EOF_SMF               BIT(1)        INIT('0'B);
+ DCL   TYPE_TABLE (0:74)     BIT(1);    /*  THIS TABLE CONTAINS
+           SWITCHES FOR EACH OF THE RECORD TYPES.  A VALUE OF ONE
+           INDICATES THAT TYPE IS TO BE PROCESSED AND A VALUE OF ZERO
+           INDICATES THAT TYPE IS TO BE IGNORED.  */
+
+ DCL   (RECORDS_READ, RECORDS_SELECTED, RECORDS_DEFAULTED)
+                             FIXED BIN(31);
+
+ %INCLUDE I$SMFCNT;
+
+ DCL   SYSPRINT              PRINT;
+
+ DCL   SMFP                  POINTER;
+ DCL 1 SMF                   UNALIGNED BASED(SMFP),
+ %INCLUDE S$SXX;
+
+ DCL 1 CALLPARM,
+ %INCLUDE S$CP;
+
+ DCL   RECORD_TYPE           BIT(8);
+ DCL   I                     FIXED BIN(15);
+
+ CALL PARSE_PARM;
+
+ ON ENDFILE(SMFDATA)  EOF_SMF='1'B;
+
+ READ FILE(SMFDATA) SET(SMFP);
+ DO WHILE(^EOF_SMF);
+
+   RECORDS_READ=RECORDS_READ+1;
+
+   RECORD_TYPE = SMF.SMFXRTY;
+
+   IF (RECORD_TYPE > 74) THEN GOTO LOOP;
+
+   SMFCNT.BY_TYPE(RECORD_TYPE) =
+     SMFCNT.BY_TYPE(RECORD_TYPE) + 1;
+
+   IF (TYPE_TABLE(RECORD_TYPE) = '0'B) THEN GOTO LOOP;
+
+   CALLPARM.DEFAULT_PROCESSOR_USED = '0'B;
+
+   IF (RECORD_TYPE = 0) THEN DO;
+     RECORDS_SELECTED = RECORDS_SELECTED + 1;
+     CALL P$00(CALLPARM, SMFP);
+   END;
+
+   IF (RECORD_TYPE = 2) THEN DO;
+     RECORDS_SELECTED = RECORDS_SELECTED + 1;
+     CALL P$02(CALLPARM, SMFP);
+   END;
+
+   IF (RECORD_TYPE = 3) THEN DO;
+     RECORDS_SELECTED = RECORDS_SELECTED + 1;
+     CALL P$03(CALLPARM, SMFP);
+   END;
+
+   IF (RECORD_TYPE = 4) THEN DO;
+     RECORDS_SELECTED = RECORDS_SELECTED + 1;
+     CALL P$04(CALLPARM, SMFP);
+   END;
+
+   IF (RECORD_TYPE = 5) THEN DO;
+     RECORDS_SELECTED = RECORDS_SELECTED + 1;
+     CALL P$05(CALLPARM, SMFP);
+   END;
+
+   IF (RECORD_TYPE = 6) THEN DO;
+     RECORDS_SELECTED = RECORDS_SELECTED + 1;
+     CALL P$06(CALLPARM, SMFP);
+   END;
+
+   IF (RECORD_TYPE = 7) THEN DO;
+     RECORDS_SELECTED = RECORDS_SELECTED + 1;
+     CALL P$07(CALLPARM, SMFP);
+   END;
+
+   IF (RECORD_TYPE = 14) THEN DO;
+     RECORDS_SELECTED = RECORDS_SELECTED + 1;
+     CALL P$14(CALLPARM, SMFP);
+   END;
+
+   IF (RECORD_TYPE = 15) THEN DO;
+     RECORDS_SELECTED = RECORDS_SELECTED + 1;
+     CALL P$15(CALLPARM, SMFP);
+   END;
+
+   IF (RECORD_TYPE = 20) THEN DO;
+     RECORDS_SELECTED = RECORDS_SELECTED + 1;
+     CALL P$20(CALLPARM, SMFP);
+   END;
+
+   IF (RECORD_TYPE = 26) THEN DO;
+     RECORDS_SELECTED = RECORDS_SELECTED + 1;
+     CALL P$26(CALLPARM, SMFP);
+   END;
+
+   IF (RECORD_TYPE = 34) THEN DO;
+     RECORDS_SELECTED = RECORDS_SELECTED + 1;
+     CALL P$34(CALLPARM, SMFP);
+   END;
+
+   IF (RECORD_TYPE = 70) THEN DO;
+     RECORDS_SELECTED = RECORDS_SELECTED + 1;
+     CALL P$70(CALLPARM, SMFP);
+   END;
+
+   IF (CALLPARM.DEFAULT_PROCESSOR_USED = '1'B) THEN DO;
+     RECORDS_DEFAULTED = RECORDS_DEFAULTED + 1;
+   END;
+
+   /*
+   PUT SKIP(1) EDIT (SMF.SMFXRTY, CALLPARM.DEFAULT_PROCESSOR_USED)
+     (P'999', P'999');
+   */
+
+   LOOP: READ FILE(SMFDATA) SET(SMFP);
+
+ END; /* DO WHILE */
+
+ DO I = 0 TO 74;
+   IF (SMFCNT.BY_TYPE(I) > 0) THEN DO;
+     PUT FILE(SYSPRINT) SKIP(1)
+       EDIT ('TYPE ', I, ':',
+         SMFCNT.BY_TYPE(I), ' RECORDS READ')
+       (A, P'Z9', A, P'ZZZ,ZZZ,ZZ9', A);
+   END;
+ END;
+
+ PUT SKIP(2) EDIT(RECORDS_READ,' SMF RECORDS READ')
+                 (P'ZZZ,ZZZ,ZZ9',A);
+ PUT SKIP(1) EDIT(RECORDS_SELECTED, ' SMF RECORDS SELECTED')
+                 (P'ZZZ,ZZZ,ZZ9',A);
+ PUT SKIP(1) EDIT(RECORDS_DEFAULTED, ' SMF RECORDS DEFAULTED')
+                 (P'ZZZ,ZZZ,ZZ9',A);
+ RETURN;
+1PARSE_PARM: PROC;
+
+ DCL   PARM_NUMBER (0:74) CHAR (2) VARYING INIT
+          ('0','1','2','3','4','5','6',
+           '7','8','9','10','11','12','13','14','15','16','17','18',
+          '19','20','21','22','23','24','25','26','27','28','29','30',
+          '31','32','33','34','35','36','37','38','39','40','41','42',
+          '43','44','45','46','47','48','49','50','51','52','53','54',
+          '55','56','57','58','59','60','61','62','63','64','65','66',
+          '67','68','69','70','71','72','73','74');
+    /*   THIS TABLE CONTAINS ALL OF THE RECORD TYPES ACCEPTED BY     */
+    /*    THIS PROGRAM                                               */
+
+ DCL   START FIXED BINARY (15,0),  /* PARAMETER STRING POINTER       */
+
+       PARM_LENGTH FIXED BINARY (15,0),  /* LENGTH OF PARAMETER      */
+
+       VALUE CHAR (3) VARYING,            /* PARAMETER ITEM -  THIS
+          LENGTH SHOULD BE 1 MORE THAN THE LENGTH OF PARM_LENGTH
+          TO PROTECT AGAINST TRUNCATION MATCHES  */
+
+       PLACE FIXED BINARY (15,0),  /* POSITION VALUE RETURNED FROM
+           THE BUILT-IN FUNCTION INDEX  */;
+
+ PARM_LENGTH = LENGTH(PARM_STRING);
+
+ IF PARM_LENGTH = 0  THEN            /* TEST FOR NULL PARAMETER   */
+                                     /* IF NULL, PROCESS ALL TYPES*/
+   DO I = 0 TO 74;                                      /* Y02120 */
+     TYPE_TABLE(I) = '1'B;           /*       SET TYPE SWITCH ON  */
+   END;                              /* END FOR DO I = 74         */
+ ELSE                                /* IF TYPE PARAMETER VALUES  */
+   DO;                               /* PRESENT, SET SELECT SWITCH*/
+     START = 1;                      /* SET PARAMETER POINTER     */
+     DO WHILE (START ^> PARM_LENGTH); /* SET LOOP FOR STRING      */
+       PLACE = INDEX(SUBSTR(PARM_STRING,START),',');
+                                     /* SEARCH PARAMETER FOR COMMA*/
+       IF PLACE ^= 0  THEN           /* TEST FOR END OF PARAMETER */
+                                     /* IF NOT THE END THEN       */
+         DO;                         /* PROCESS CURRENT VALUE     */
+                                     /* EXTRACT TYPE VALUE        */
+           VALUE = SUBSTR(PARM_STRING,START,PLACE-1);
+           START = START + PLACE;    /* INCREMENT POINTER         */
+         END;                        /* END OF DO FOR PLACE ^= 0  */
+       ELSE                          /* IF END OF PARAMETER       */
+         DO;                         /* PROCESS LAST VALUE        */
+           VALUE = SUBSTR(PARM_STRING,START);
+           START = PARM_LENGTH + 1;  /* SET LOOP TO END           */
+         END;                        /* END OF DO FOR PLACE = 0   */
+                                                           /* Y02120 */
+       PUT FILE(SYSPRINT) SKIP DATA(VALUE);
+       DO I = 0 TO 74;               /* SET TYPE_TABLE LOOP       */
+         IF VALUE = PARM_NUMBER(I) THEN /* SEARCH FOR VALUE       */
+                                     /* IF VALUE FOUND            */
+           TYPE_TABLE(I) = '1'B;     /* SET TYPE SWITCH           */
+   END;                              /* END OF DO FOR LENGTH ^= 0 */
+ END PARSE_PARM;
+ END SMFRDR;

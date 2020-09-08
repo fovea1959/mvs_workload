@@ -1,0 +1,19 @@
+ PTRADD: PROC(P, I) RETURNS (POINTER);
+   DCL OUT POINTER;
+   DCL P POINTER;
+   DCL I FIXED BIN(31);
+
+   DCL P_I FIXED BIN(31);
+
+   UNSPEC(P_I) = UNSPEC(P);
+   /*
+   PUT FILE(REPORT) SKIP EDIT ('  B4=', P_I) (A, P'(9)9');
+   PUT FILE(REPORT) SKIP EDIT ('   I=', I) (A, P'(9)9');
+   */
+   P_I = P_I + I;
+   /*
+   PUT FILE(REPORT) SKIP EDIT ('  AF=', P_I) (A, P'(9)9');
+   */
+   UNSPEC(OUT) = UNSPEC(P_I);
+   RETURN (OUT);
+ END PTRADD;

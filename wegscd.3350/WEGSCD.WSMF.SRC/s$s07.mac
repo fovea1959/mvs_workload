@@ -1,0 +1,11 @@
+ /*
+ DCL 1 SMF07                     UNALIGNED BASED(SMFP),
+ */
+       5 SMF7FLG   BIT(8),
+       5 SMF7RTY   BIT(8),
+       5 SMF7TME   FIXED BIN(31),
+       5 SMF7DTE   FIXED DEC(7),
+       5 SMF7SID   CHAR(4),
+       5 SMF7NRO   FIXED BIN(15),
+       5 SMF7STM   FIXED BIN(31),
+       5 SMF7STD   FIXED DEC(7);

@@ -1,0 +1,13 @@
+TAB      TITLE 'IHETAB'
+IHETAB   CSECT
+         ENTRY IHETABS
+IHETABS  DS    0D
+PAGESIZE DC    AL2(60)
+LINESIZE DC    AL2(80)
+         DC    H'0'
+NOTABS   DC    AL1(ENDTABS-*-1)
+         DC    AL1(21)
+         DC    AL1(41)
+         DC    AL1(61)
+ENDTABS  EQU   *
+         END

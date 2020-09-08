@@ -1,0 +1,19 @@
+ /*  CONVERT BINARY TOD TO CHARACTER 'HH:MM:SS'                      */
+
+ DECLARE F_SMFTIME ENTRY RETURNS(CHARACTER(12) VARYING);
+
+ F_SMFTIME: PROC(TIME) RETURNS(CHARACTER(12) VARYING);
+   DCL     TIME                    FIXED BIN(31); /* TIME IN SEC/100 */
+   DCL     WT                      FIXED BIN(31);
+   DCL     (HH,MM,SS,HS)           PIC'99';
+   DCL     TC                      CHAR(12) VARYING;
+   DCL     (FLOOR,MOD,SUBSTR)      BUILTIN;
+   HS=MOD(TIME,100);
+   WT=TIME/100;
+   SS=MOD(WT,60);
+   WT=FLOOR((WT-SS)/60);
+   MM=MOD(WT,60);
+   HH=FLOOR((WT-MM)/60);
+   TC=HH××':'××MM××':'××SS××'.'××HS;
+   RETURN(TC);
+ END F_SMFTIME;

@@ -1,0 +1,5 @@
+ /*
+ DCL  1  ACCOUNTING                UNALIGNED,
+ */
+         5 PANO     CHAR(20),
+         5 ROOM     CHAR(20);

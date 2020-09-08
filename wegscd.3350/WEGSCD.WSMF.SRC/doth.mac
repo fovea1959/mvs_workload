@@ -1,0 +1,18 @@
+ DCL     (
+          ADDR,
+          BOOL,
+          DATE,
+          FIXED,                                         /* PF061793 */
+          FLOAT,                                         /* PF061693 */
+          FLOOR,
+          HBOUND,
+          INDEX,                                         /* PF061693 */
+          LENGTH,
+          MOD,
+          NULL,
+          STRING,
+          SUBSTR,
+          UNSPEC,
+          VERIFY
+         )
+                                   BUILTIN;

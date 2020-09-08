@@ -1,0 +1,16 @@
+ /* ---------------------------------------------------------------- */
+ /*                SMF TYPE 0 (IPL) RECORD                           */
+ /* ---------------------------------------------------------------- */
+ /*
+ DCL  1  SMF00                     UNALIGNED BASED(SMFP),
+ */
+         5 SMF0FLG                 BIT(8),
+         5 SMF0RTY                 BIT(8),
+         5 SMF0TME                 FIXED BIN(31),
+         5 SM50DTE                 FIXED DEC(7),
+         5 SMF0SID                 CHAR(4),
+         5 SMF0JWT                 FIXED BIN(31),
+         5 SMF0BUF                 FIXED BIN(31),
+         5 SMF0VST                 FIXED BIN(31),
+         5 SMF0OPT                 BIT(8),
+         5 SMF0RST                 FIXED BIN(31);

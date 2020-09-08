@@ -1,0 +1,20 @@
+ /*
+ DCL  1  SMF34                     UNALIGNED BASED(SMFP),
+ */
+         5 SMF34_TIVRFLG           BIT(8),
+         5 SMF34_TIVRCDTY          BIT(8),
+         5 SMF34_TIVRCDTS          FIXED BIN(31),
+         5 SMF34_TIVRCDTE          FIXED DEC(7),
+         5 SMF34_TIVCPUID          CHAR(4),
+         5 SMF34_TIVUIF            CHAR(8),
+         5 SMF34_TIVONTME          FIXED BIN(31),
+         5 SMF34_TIVONDTE          FIXED DEC(7),
+         5 SMF34_TIVUDATA          CHAR(8),
+         5 SMF34_TIVINVSQ          BIT(8),
+         5 SMF34_TIVSIT            FIXED BIN(31),
+         5 SMF34_TIVOUTCT          FIXED BIN(31),
+         5 SMF34_TIVINCT           FIXED BIN(31),
+         5 SMF34_TIVSTAT           BIT(16),
+         5 SMF34_TIVPRI            BIT(8),
+         5 SMF34_TIVPRGNM          CHAR(8),
+         5 SMF34_TIVINVNM          CHAR(8);

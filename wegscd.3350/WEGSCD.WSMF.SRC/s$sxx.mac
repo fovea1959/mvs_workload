@@ -1,0 +1,12 @@
+ /* ---------------------------------------------------------------- */
+ /*                SMF COMMON HEADER                                 */
+ /* ---------------------------------------------------------------- */
+ /*
+ DCL   1 SMFREC          UNALIGNED BASED(SMFP),
+ */
+         5 SMFXFLG                 BIT(8),       /* SYSTEM INDICATOR */
+         5 SMFXRTY                 BIT(8),       /* RECORD TYPE      */
+         5 SMFXTME                 FIXED BIN(31),/* TIME WRITTEN     */
+         5 SMFXDTE                 FIXED DEC(7), /* DATE WRITTEN     */
+         5 SMFXSID                 CHAR(4),      /* SYSTEM IDENT     */
+         5 SMFX_RECORD_START       CHAR(0);      /* START OF DATA    */

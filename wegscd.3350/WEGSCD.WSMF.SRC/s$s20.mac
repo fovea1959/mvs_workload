@@ -1,0 +1,19 @@
+ /* ---------------------------------------------------------------- */
+ /*                SMF TYPE 20 (JOB INITIATION) RECORD               */
+ /* ---------------------------------------------------------------- */
+ /*
+ DCL  1  SMF20                     UNALIGNED BASED(SMFP),
+ */
+         5 SMF20FLG                BIT(8),
+         5 SMF20RTY                BIT(8),
+         5 SMF20TME                FIXED BIN(31),
+         5 SMF20DTE                FIXED DEC(7),
+         5 SMF20SID                CHAR(4),
+         5 SMF20JBN                CHAR(8),
+         5 SMF20RST                FIXED BIN(31),
+         5 SMF20RSD                FIXED DEC(7),
+         5 SMF20UID                CHAR(8),
+         5 SMF20RLO                FIXED BIN(15),
+         5 SMF20PGM                CHAR(20),
+         5 SMF20NAF                BIT(8),
+         5 SMF20ACT                CHAR(0);

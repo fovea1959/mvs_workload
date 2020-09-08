@@ -1,0 +1,22 @@
+ /* ---------------------------------------------------------------- */
+ /*                SMF TYPE 26 (JES2 JOB PURGE) EVENTS SECTION       */
+ /* ---------------------------------------------------------------- */
+ /*
+ DCL  1  SMF26EVT                  UNALIGNED BASED(SMF26EVTP)
+ */
+         5 SMF26LN2                FIXED BIN(15),
+         5 SMF26RV2                FIXED BIN(15),
+         5 SMF26RPT                FIXED BIN(31),
+         5 SMF26RPD                FIXED DEC(7),
+         5 SMF26CST                FIXED BIN(31),
+         5 SMF26CSD                FIXED DEC(7),
+         5 SMF26CPT                FIXED BIN(31),
+         5 SMF26CPD                FIXED DEC(7),
+         5 SMF26XST                FIXED BIN(31),
+         5 SMF26XSD                FIXED DEC(7),
+         5 SMF26XPT                FIXED BIN(31),
+         5 SMF26XPD                FIXED DEC(7),
+         5 SMF26OST                FIXED BIN(31),
+         5 SMF26OSD                FIXED DEC(7),
+         5 SMF26OPT                FIXED BIN(31),
+         5 SMF26OPD                FIXED DEC(7);

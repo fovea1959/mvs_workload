@@ -1,0 +1,8 @@
+ /*
+ DCL  1  SMF4DEV                   UNALIGNED BASED(SMFDEVP),
+ */
+         5 SMF4DEVC                BIT(8),
+         5 SMF4UTYP                BIT(8),
+         5 SMF4UCAD                FIXED BIN(15),
+         5 SMF4EXCP                FIXED BIN(31),
+         5 SMF4DEVE                CHAR(0);

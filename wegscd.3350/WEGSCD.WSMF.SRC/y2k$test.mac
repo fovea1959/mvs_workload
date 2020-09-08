@@ -1,0 +1,139 @@
+//WEGSCD   JOB (DOUG,5278),TEST.Y2K,CLASS=A,MSGCLASS=A,
+//             MSGLEVEL=(1,1)
+//        EXEC PL1LFCL,REGION.PL1L=256K,
+//  PARM.PL1L='M,NS2,N=Y2K$TEST,SIZE=999999,LC=60,SM=(2,72,1)',
+//  PARM.LKED='NOXREF,LIST'
+//PL1L.SYSLIN DD UNIT=SYSDA
+//PL1L.SYSIN DD *
+ Y2K$TST: PROC OPTIONS(MAIN);
+ DECLARE Y2KJTOG ENTRY;
+ DCL T FIXED DEC(7);
+ DCL C7 CHAR(7),
+     C1 CHAR(1),
+     C8 CHAR(8);
+
+ DCL PRINTABLECC RETURNS (CHAR(40) VARYING);
+ DCL FNL         RETURNS (CHAR(9) VARYING);
+ DCL H8          RETURNS (CHAR(8));
+ DCL HB16        RETURNS (CHAR(4));
+ T = 15300;
+ PUT STRING(C7) EDIT ('20', T) (A, P'99999');
+ PUT SKIP EDIT (T, ' >', C7, '<') (P'ZZZZZZ9', A, A, A);
+ DCL A7 FIXED DEC(1) BASED (P7),
+     A1 FIXED DEC(1) BASED (P1),
+     A8 FIXED DEC(1) BASED (P8);
+ P7 = ADDR(C7); P1 = ADDR(C1); P8 = ADDR(C8);
+ /*
+ DCL A7 FIXED DEC(1) DEFINED C7,
+     A1 FIXED DEC(1) DEFINED C1,
+     A8 FIXED DEC(1) DEFINED C8;
+ */
+ CALL Y2KJTOG (A7, A1, A8);
+ PUT SKIP EDIT (C7, ' ', C1, ' ', C8) (A, A, A, A, A);
+ DCL B16 BIT(16);
+ B16 = '0001111100000000'B; /* 7936(1) 1F00(16) */
+ PUT SKIP EDIT (B16, ' ', PRINTABLECC(B16, 0))
+ (P'99999', A, A);
+ B16 = '1000001100100010'B; /* 8322(16) */
+ PUT SKIP EDIT (B16, ' ', PRINTABLECC(B16, 0))
+ (P'99999', A, A);
+ B16 = '0010010100100010'B; /* 2522(16) */
+ PUT SKIP EDIT (B16, ' ', PRINTABLECC(B16, 0))
+ (P'99999', A, A);
+ /*
+ DCL CC BIN FIXED(31);
+ CC = 0;
+ PUT SKIP EDIT (CC, ' ', H8(CC)) (P'99999', A, A);
+
+ CC = 0;
+ PUT SKIP EDIT (CC, ' ', H8(CC)) (P'99999', A, A);
+ CC = 16384;
+ PUT SKIP EDIT (CC, ' ', H8(CC)) (P'99999', A, A);
+ */
+1FNL: PROC(I) RETURNS (CHAR(9) VARYING);
+   DCL I FIXED BIN(31);
+   DCL OUT CHAR(9) VARYING;
+   PUT STRING(OUT) EDIT (I) (P'999999999');
+   DO WHILE ((LENGTH(OUT) > 1) & (SUBSTR(OUT,1,1) = '0'));
+     OUT = SUBSTR(OUT, 2, LENGTH(OUT)-1);
+     END;
+   RETURN (OUT);
+ END FNL;
+   DCL TABLE (0:15) CHAR (1) INIT ('0','1','2','3','4','5','6','7','8',
+                                 '9','A','B','C','D','E','F');
+ HB16: PROC(I) RETURNS (CHAR(4));
+   DCL I BIT(16);
+   DCL OUT CHAR(4);
+   DCL I2 BIT(16);
+   DCL I3 BIT(16);
+   I2 = I;
+   OUT = '****';
+   DO J = 4 TO 1 BY -1;
+     I3 = I2 & '0000000000001111'B;
+     /*
+     PUT SKIP EDIT ('I3=', I3, ' I2=', I2, ' J=', J, ' OUT=', OUT)
+     (A, P'(9)9', A, P'(9)9', A, P'(9)9', A, A);
+     */
+     SUBSTR(OUT,J,1) = TABLE(I3);
+     I2 = '0000'B ×× I2;
+   END;
+   RETURN (OUT);
+ END HB16;
+ H8: PROC(I) RETURNS (CHAR(8));
+   DCL I FIXED BIN(31);
+   DCL OUT CHAR(8);
+   DCL I2 BIT(31);
+   DCL I3 BIT(31);
+   I2 = BIT(I);
+   OUT = '********';
+   DO J = 8 TO 1 BY -1;
+     I3 = I2 & '00000000000000000000000000001111'B;
+     /*
+     PUT SKIP EDIT ('I3=', I3, ' I2=', I2, ' J=', J, ' OUT=', OUT)
+     (A, P'(9)9', A, P'(9)9', A, P'(9)9', A, A);
+     */
+     SUBSTR(OUT,J,1) = TABLE(I3);
+     I2 = I2 / 16;
+   END;
+   RETURN (OUT);
+ END H8;
+ PRINTABLECC: PROC (CC,STI) RETURNS (CHAR(40) VARYING);
+   DCL CC BIT(16);
+   DCL STI BIT(8);
+   DCL OUT CHAR(40) VARYING;
+   DCL CC1 FIXED BIN(31);
+   IF (CC < 256) THEN DO;
+     CC1 = FIXED(CC);
+     PUT STRING(OUT) EDIT (FNL(CC1),',',CC) (A,A,P'999');
+     END;
+   ELSE DO;
+     DCL V BIT(16);
+     V = CC & '1111000000000000'B;
+     DCL SU CHAR(1);
+     IF (V = '1000000000000000'B × V = '0001000000000000'B) THEN DO;
+       IF (V = '1000000000000000'B) THEN SU = 'U'; ELSE SU = 'S';
+       V = CC & '0000111111111111'B;
+       /*
+       PUT STRING(OUT) EDIT (SU, V, ',', CC) (A, P'99999', A, P'99999');
+       PUT SKIP EDIT ('HB16=', HB16(V)) (A, A);
+       */
+       PUT STRING(OUT) EDIT
+         (SU, SUBSTR(HB16(V), 2, 3))
+         (A, A);
+       END;
+     ELSE DO;
+       PUT STRING(OUT) EDIT
+         (HB16(CC))
+         (A);
+       END;
+   RETURN (OUT);
+ END PRINTABLECC;
+ END Y2K$TST;
+/*
+//LKED.SYSLIB  DD DSN=SYSC.PL1LIB,DISP=SHR
+//             DD DSN=JAY01.Y2K.LOADLIB,DISP=SHR
+//LKED.SYSLMOD DD DSN=WEGSCD.LOADLIB,DISP=OLD
+//GO      EXEC PGM=Y2K$TEST,
+//             PARM=''
+//STEPLIB   DD DSN=WEGSCD.LOADLIB,DISP=SHR
+//SYSPRINT  DD SYSOUT=*

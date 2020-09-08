@@ -1,0 +1,28 @@
+ /* RELOCATE SECTION                    */
+ /*
+ DCL  1  SMF4REL                   UNALIGNED BASED(SMF4RELP),
+ */
+         5 SMF4PGIN                FIXED BIN(31),
+         5 SMF4PGOT                FIXED BIN(31),
+         5 SMF4NSW                 FIXED BIN(31),
+         5 SMF4PSI                 FIXED BIN(31),
+         5 SMF4PSO                 FIXED BIN(31),
+         5 SMF4VPI                 FIXED BIN(31),
+         5 SMF4VPO                 FIXED BIN(31),
+         5 SMF4SST                 FIXED BIN(31),
+         5 SMF4ACT                 FIXED BIN(31),
+         5 SMF4PGNO                FIXED BIN(15),
+         5 SMF4TRAN                FIXED BIN(31),
+         5 SMF4RECL                FIXED BIN(31),
+         5 SMF4RCLM                FIXED BIN(31),
+         5 SMF4CPGN                FIXED BIN(31),
+         5 SMF4CRCL                FIXED BIN(31),
+         5 SMF4PGST                FIXED BIN(31),
+         5 SMF4PSEC                BIT(64),
+         5 SMF4LPAI                FIXED BIN(31),
+         5 SMF4LPAR                FIXED BIN(31),
+         5 SMF4CPUS                FIXED BIN(31),
+         5 SMF4IOCS                FIXED BIN(31),
+         5 SMF4MSOS                FIXED BIN(31),
+         5 SMF4SRBS                FIXED BIN(31),
+         5 SMF4RSV1                CHAR(8);

@@ -1,0 +1,414 @@
+ SMFPLNK: PROC(PARM_STRING) OPTIONS(MAIN);
+
+   DCL PARM_STRING CHAR(100) VARYING;
+
+   DCL SMFRDR      ENTRY;
+
+   DCL REPORT      PRINT;
+
+   CALL SMFRDR(PARM_STRING);
+   RETURN;
+ END SMFPLNK;
+*PROCESS('ATR,M,NS2');
+ /* RECORD HANDLERS */
+ P$XX: PROC (CP, SMFP);
+   DCL 1 CP,
+ %INCLUDE S$CP;
+   DCL SMFP POINTER;
+   RETURN;
+1EVENTSTART: PROC(P,T);
+   DCL P POINTER;
+   DCL T CHAR(8) VARYING;
+
+   DCL 1 SMF UNALIGNED BASED(P),
+ %INCLUDE S$SXX;
+   PUT FILE(REPORT) SKIP EDIT (
+     '*EVENT time=', F_TIMESTAMP(SMF.SMFXDTE, SMF.SMFXTME),
+     ' smft=', T,
+     ' smfc=', F_BIN31(FIXED(SMF.SMFXRTY,31,0)),
+     ' sid=', SMF.SMFXSID
+   ) (
+       A, A,
+       A, A,
+       A, A,
+       A, A
+   );
+ END EVENTSTART;
+ EVENTEND: PROC;
+   PUT FILE(REPORT) SKIP EDIT ('--') (A);
+ END EVENTEND;
+ %INCLUDE TRIM4;
+ %INCLUDE TRIM8;
+ %INCLUDE TRIM20;
+ %INCLUDE STRIP4;
+ %INCLUDE FSMFTIME;
+ %INCLUDE I$PTRS;
+ %INCLUDE FTMSTMP;
+ %INCLUDE FBIN31;
+ %INCLUDE FSTEPID;
+ %INCLUDE FJOBID;
+ %INCLUDE FCC;
+ %INCLUDE FCPUTIME;
+ %INCLUDE FIXDATE;
+ %INCLUDE ACCTNGX;
+1/* IPL RECORD */
+ P$00: ENTRY(CP, SMFP);
+   DCL 1 SMF00 UNALIGNED BASED(SMFP),
+ %INCLUDE S$S00;
+
+   BEGIN;
+     CALL EVENTSTART(SMFP, 'IPL');
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' vs=', F_BIN31(SMF0VST),
+       ' cs=', F_BIN31(SMF0RST)
+     ) (
+       A, A,
+       A, A
+     );
+
+     CALL EVENTEND;
+   END;
+   RETURN;
+1/* PROCESS STEP TERMINATION      */
+ P$04: ENTRY(CP, SMFP);
+   DCL 1 SMF04 UNALIGNED BASED(SMFP),
+ %INCLUDE S$S04;
+
+   DCL SMF04ACCTP POINTER;
+   DCL 1 SMF04ACCT UNALIGNED BASED(SMF04ACCTP),
+ %INCLUDE S$S04ACC;
+
+   BEGIN;
+     DCL P_OFFSET FIXED BIN(31);
+
+     SMF4STID = FIXDATE (SMF4STID);
+     SMF4DTE = FIXDATE (SMF4DTE);
+
+     P_OFFSET = PTRDIFF(SMFP, ADDR(SMF04.SMF4LENN));
+     P_OFFSET = P_OFFSET + SMF04.SMF4LENN;
+     SMF04ACCTP = PTRADD (SMFP, P_OFFSET);
+
+     CALL EVENTSTART (SMFP, 'STEPTERM');
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' jobid=', F_JOBID(SMF4JBN, SMF4RSD, SMF4RST),
+       ' stepid=',
+         F_STEPID(SMF4JBN, SMF4RSD, SMF4RST, FIXED(SMF4STN, 31))
+     ) (
+       A, A,
+       A, A
+     );
+
+     /* TODO PREPROCESS PROGRAM FOR PGM *.DD */
+     PUT FILE(REPORT) SKIP EDIT (
+       ' job=', TRIM8(SMF4JBN),
+       ' step=', TRIM8(SMF4STMN),
+       ' cc=', F_CC(SMF4SCC,SMF4STI),
+       ' program=', TRIM8(SMF4PGMN)
+     ) (
+       A, A,
+       A, A,
+       A, A,
+       A, A
+     );
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' region=', F_BIN31(SMF4RSH0),
+       ' memlow=', F_BIN31(FIXED(SMF4HOST,31,0)),
+       ' memhigh=', F_BIN31(FIXED(SMF4SYST,31,0)),
+       ' init=', F_TIMESTAMP(SMF4STID, SMF4SIT)
+     ) (
+       A, A,
+       A, A,
+       A, A,
+       A, A
+     );
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' srb=', F_CPUTIME(FIXED(SMF4SRBT,31,0)),
+       ' tcb=', F_CPUTIME(FIXED(SMF4SETM,31,0)),
+       ' cpu=', F_CPUTIME(FIXED(SMF4SETM+SMF4SRBT,31,0))
+     ) (
+       A, A,
+       A, A,
+       A, A
+     );
+
+     DCL 1 ACCOUNTING UNALIGNED,
+ %INCLUDE ACCTNGF;
+     DCL (PA, PP) POINTER;
+     PA = ADDR(ACCOUNTING);
+     PP = ADDR(SMF4NAF);
+     DCL S20 CHAR(20) VARYING;
+
+     CALL ACCOUNTING_EXTRACT (PA, PP);
+
+     S20 = TRIM20 (ACCOUNTING.PANO);
+     IF LENGTH(S20) > 0 THEN
+       PUT FILE(REPORT) SKIP EDIT(
+         ' step_pano="', S20, '"'
+       ) (
+         A, A, A
+       );
+
+     S20 = TRIM20 (ACCOUNTING.ROOM);
+     IF LENGTH(S20) > 0 THEN
+       PUT FILE(REPORT) SKIP EDIT(
+         ' step_room="', S20, '"'
+       ) (
+         A, A, A
+       );
+
+     CALL EVENTEND;
+   END;
+   RETURN;
+1/* TYPE 5: JOB TERMINATION */
+ P$05: ENTRY (CP, SMFP);
+   DCL 1 SMF05 UNALIGNED BASED(SMFP),
+ %INCLUDE S$S05;
+
+   BEGIN;
+     SMF5JID = FIXDATE(SMF5JID);
+
+     CALL EVENTSTART(SMFP, 'JOBTERM');
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' jobid=', F_JOBID(SMF5JBN, SMF5RSD, SMF5RST)
+     ) (
+       A, A
+     );
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' class=', SMF5JICL,
+       ' cc=', F_CC(SMF5JCC,SMF5JBTI),
+       ' cpu=', F_CPUTIME(FIXED(SMF5SRBT,31,0)),
+       ' service=', F_BIN31(SMF5TJS)
+     ) (
+       A, A,
+       A, A,
+       A, A,
+       A, A
+     );
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' init=', F_TIMESTAMP(SMF5JID, SMF5JIT)
+     ) (
+       A, A
+     );
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' job=', TRIM8(SMF5JBN),
+       ' programmer="', TRIM20(SMF5PRGN), '"'
+     ) (
+       A, A,
+       A, A, A
+     );
+
+     DCL 1 ACCOUNTING UNALIGNED,
+ %INCLUDE ACCTNGF;
+     DCL (PA, PP) POINTER;
+     PA = ADDR(ACCOUNTING);
+     PP = ADDR(SMF5ACTF);
+     DCL S20 CHAR(20) VARYING;
+
+     CALL ACCOUNTING_EXTRACT (PA, PP);
+
+     S20 = TRIM20 (ACCOUNTING.PANO);
+     IF LENGTH(S20) > 0 THEN
+       PUT FILE(REPORT) SKIP EDIT(
+         ' job_pano="', S20, '"'
+       ) (
+         A, A, A
+       );
+
+     S20 = TRIM20 (ACCOUNTING.ROOM);
+     IF LENGTH(S20) > 0 THEN
+       PUT FILE(REPORT) SKIP EDIT(
+         ' job_room="', S20, '"'
+       ) (
+         A, A, A
+       );
+
+     CALL EVENTEND;
+   END;
+   RETURN;
+1/* TYPE 6: WRITER */
+ P$06: ENTRY (CP, SMFP);
+   DCL 1 SMF06 UNALIGNED BASED(SMFP),
+ %INCLUDE S$S06;
+
+   BEGIN;
+     SMF6WSD = FIXDATE(SMF6WSD);
+
+     CALL EVENTSTART(SMFP, 'WRITER');
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' jobid=', F_JOBID(SMF6JBN, SMF6RSD, SMF6RST),
+       ' job=', SMF6JBN,
+       ' jobnumber=', STRIP4(SMF6JNM)
+     ) (
+       A, A,
+       A, A,
+       A, A
+     );
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' init=', F_TIMESTAMP(SMF6WSD, SMF6WST)
+     ) (
+       A, A
+     );
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' device=', TRIM8(SMF6OUT),
+       ' outclass=', SMF6OWC,
+       ' records=', F_BIN31(SMF6NLR),
+       ' form="', SMF6FMN, '"'
+     ) (
+       A, A,
+       A, A,
+       A, A,
+       A, A, A
+     );
+
+     CALL EVENTEND;
+   END;
+   RETURN;
+1P$20: ENTRY(CP, SMFP);
+   DCL 1 SMF20 UNALIGNED BASED(SMFP),
+ %INCLUDE S$S20;
+   BEGIN;
+     CALL EVENTSTART(SMFP, 'JOBINIT');
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' jobid=', F_JOBID(SMF20JBN, SMF20RSD, SMF20RST)
+     ) (
+       A, A
+     );
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' job=', TRIM8(SMF20JBN),
+       ' programmer="', TRIM20(SMF20PGM), '"'
+     ) (
+       A, A,
+       A, A, A
+     );
+
+     DCL 1 ACCOUNTING UNALIGNED,
+ %INCLUDE ACCTNGF;
+     DCL (PA, PP) POINTER;
+     PA = ADDR(ACCOUNTING);
+     PP = ADDR(SMF20NAF);
+     DCL S20 CHAR(20) VARYING;
+
+     CALL ACCOUNTING_EXTRACT (PA, PP);
+
+     S20 = TRIM20 (ACCOUNTING.PANO);
+     IF LENGTH(S20) > 0 THEN
+       PUT FILE(REPORT) SKIP EDIT(
+         ' job_pano="', S20, '"'
+       ) (
+         A, A, A
+       );
+
+     S20 = TRIM20 (ACCOUNTING.ROOM);
+     IF LENGTH(S20) > 0 THEN
+       PUT FILE(REPORT) SKIP EDIT(
+         ' job_room="', S20, '"'
+       ) (
+         A, A, A
+       );
+
+     CALL EVENTEND;
+   END;
+   RETURN;
+1P$26: ENTRY (CP, SMFP);
+
+   DCL 1 SMF26 UNALIGNED BASED(SMFP),
+ %INCLUDE S$S26;
+
+   DCL SMF26EVTP POINTER;
+   DCL 1 SMF26EVENTS UNALIGNED BASED(SMF26EVTP),
+ %INCLUDE S$S26EVT;
+
+   DCL SMF26ACTP POINTER;
+   DCL 1 SMF26ACTUALS UNALIGNED BASED(SMF26ACTP),
+ %INCLUDE S$S26ACT;
+   BEGIN;
+     DCL P_OFFSET FIXED BIN(31);
+
+     P_OFFSET = PTRDIFF(SMFP, ADDR(SMF26.SMF26LN1));
+     P_OFFSET = P_OFFSET + SMF26.SMF26LN1;
+     SMF26EVTP = PTRADD(SMFP, P_OFFSET);
+     P_OFFSET = P_OFFSET + SMF26EVENTS.SMF26LN2;
+     SMF26ACTP = PTRADD(SMFP, P_OFFSET);
+
+     CALL EVENTSTART(SMFP, 'JESPURGE');
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' jobid=', F_JOBID(SMF26JBN, SMF26RSD, SMF26RST),
+       ' job=', TRIM8(SMF26JBN),
+       ' jesid="', SMF26JID, '"'
+     ) (
+       A, A,
+       A, A, A,
+       A, A, A
+     );
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' jobclass="', SMF26CLS, '"',
+       ' msgclass="', SMF26MSG, '"',
+       ' lines=', F_BIN31(SMF26XLN),
+       ' cards=', F_BIN31(SMF26XPU)
+     ) (
+       A, A, A,
+       A, A, A,
+       A, A,
+       A, A
+     );
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' rdr="', TRIM8(SMF26DEV), '"',
+       ' acct="', SMF26ACT, '"',
+       ' room="', SMF26ROM, '"'
+     ) (
+       A, A, A,
+       A, A, A,
+       A, A, A
+     );
+
+     CALL EVENTEND;
+   END;
+   RETURN; /* END P$26 */
+1P$34: ENTRY (CP, SMFP);
+   DCL 1 SMF34 UNALIGNED BASED(SMFP),
+ %INCLUDE S$S34;
+   BEGIN;
+
+     CALL EVENTSTART(SMFP, 'TSSTEPTERM');
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' job=', TRIM8(SMF34_TIVUIF),
+       ' rdr=', F_TIMESTAMP(SMF34_TIVONDTE, SMF34_TIVONTME)
+     ) (
+       A, A, A, A
+     );
+
+     PUT FILE(REPORT) SKIP EDIT (
+       ' step=', SMF34_TIVINVNM,
+       ' cc=', F_CC(SMF34_TIVSTAT, '0'B),
+       ' program=', SMF34_TIVPRGNM,
+       ' tgets=', F_BIN31(SMF34_TIVINCT),
+       ' tputs=', F_BIN31(SMF34_TIVOUTCT)
+     ) (
+       A, A,
+       A, A,
+       A, A,
+       A, A,
+       A, A
+     );
+
+     CALL EVENTEND;
+   END;
+   RETURN; /* END P$34 */
+ END P$XX;

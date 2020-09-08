@@ -1,0 +1,71 @@
+ /* F_CC: FORMAT A CONDCODE NICELY (ACCOUNTING FOR ABENDS) */
+ %DECLARE DEBUG FIXED;
+ %DEBUG = 0;
+
+ DECLARE F_CC ENTRY RETURNS (CHAR(40) VARYING);
+
+ F_CC: PROC (CC,STI) RETURNS (CHAR(40) VARYING);
+   DCL CC BIT(16);
+   DCL STI BIT(8);
+   DCL OUT CHAR(40) VARYING;
+   DCL CC1 FIXED BIN(31);
+   /* LOOK AT FLUSH FLAG */
+   IF (SUBSTR(STI,8,1) = '1') THEN DO;
+     PUT STRING(OUT) EDIT ('FLUSH') (A);
+     END;
+   ELSE IF (SUBSTR(STI,7,1) = '1') THEN DO;
+     DCL SU CHAR(1);
+     IF (CC > '1000000000000000'B) THEN SU = 'U'; ELSE SU = 'S';
+     DCL V BIT(16);
+     V = CC & '0000111111111111'B;
+     PUT STRING(OUT) EDIT (SU, F_ABENDCODE(CC))
+       (A, A);
+     END;
+   ELSE DO;
+     CC1 = CC;
+     PUT STRING(OUT) EDIT (F_BIN31(CC1)) (A);
+     END;
+   RETURN (OUT);
+ DECLARE F_ABENDCODE ENTRY RETURNS (CHAR(3) VARYING);
+
+ F_ABENDCODE: PROC (H) RETURNS (CHAR(3) VARYING);
+   DCL H BIT(16);
+   DCL HH FIXED BIN(4);
+   DCL I FIXED BIN(15);
+   DCL J FIXED BIN(15);
+   DCL RV CHAR(3) VARYING;
+   DCL C CHAR(1);
+
+   RV = '   ';
+
+ %IF (DEBUG) %THEN %DO;
+   PUT FILE(SYSPRINT) SKIP(2) DATA(HH);
+ %END;
+   DO I = 2 TO 4;
+     HH = SUBSTR(H,4*I-3,4);
+     J = HH;
+     IF (J = 0) THEN C = '0';
+     IF (J = 1) THEN C = '1';
+     IF (J = 2) THEN C = '2';
+     IF (J = 3) THEN C = '3';
+     IF (J = 4) THEN C = '4';
+     IF (J = 5) THEN C = '5';
+     IF (J = 6) THEN C = '6';
+     IF (J = 7) THEN C = '7';
+     IF (J = 8) THEN C = '8';
+     IF (J = 9) THEN C = '9';
+     IF (J = 10) THEN C = 'A';
+     IF (J = 11) THEN C = 'B';
+     IF (J = 12) THEN C = 'C';
+     IF (J = 13) THEN C = 'D';
+     IF (J = 14) THEN C = 'E';
+     IF (J = 15) THEN C = 'F';
+     SUBSTR(RV,I-1,1) = C;
+ %IF (DEBUG) %THEN %DO;
+     PUT FILE(SYSPRINT) SKIP(2) DATA(I, HH, J, C, RV);
+ %END;
+   END;
+   RETURN(RV);
+ END F_ABENDCODE;
+
+ END F_CC;

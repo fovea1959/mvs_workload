@@ -1,0 +1,50 @@
+ DCL F_TIMESTAMP ENTRY RETURNS (CHAR(23) VARYING);
+
+ F_TIMESTAMP: PROC (D,T) RETURNS (CHAR(23) VARYING);
+
+   DCL Y2KJTOG ENTRY;
+
+   DCL T FIXED BIN(31);
+   DCL D FIXED DEC(7);
+   DCL YYYY FIXED DEC(4);
+   DCL DDD FIXED DEC(3);
+   DCL 1 CARG UNALIGNED,
+         2 C7 CHAR(7),
+         2 C1 CHAR(1),
+         2 C8 CHAR(8);
+   DCL P POINTER;
+   DCL ARG FIXED DEC(1) BASED (P);
+
+   /*
+   PUT FILE(SYSPRINT) SKIP DATA(CARG);
+   */
+
+   /* TODO: LOOK AT D TO SEE IF '1YYDDD' */
+   YYYY = D / 1000;
+   YYYY = YYYY + 1900;
+   DDD = MOD (D, 1000);
+   PUT STRING(C7) EDIT (YYYY, DDD) (P'9999', P'999');
+
+   /*
+   C1 = '.'; C8 = '........';
+   PUT FILE(SYSPRINT) SKIP DATA(CARG);
+   */
+
+   P = ADDR(CARG);
+   CALL Y2KJTOG (ARG);
+
+   /*
+   PUT FILE(SYSPRINT) SKIP DATA(CARG);
+   */
+
+   DCL OUT CHAR(23) VARYING;
+   PUT STRING(OUT) EDIT (
+     SUBSTR(C8, 5, 4), '-', SUBSTR(C8, 1, 2), '-', SUBSTR(C8, 3, 2),
+     ':', F_SMFTIME(T)
+     )
+     (
+      A, A, A, A, A,
+      A, A
+     );
+   RETURN (OUT);
+ END F_TIMESTAMP;
